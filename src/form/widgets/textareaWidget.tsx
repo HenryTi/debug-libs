@@ -1,0 +1,13 @@
+import * as React from 'react';
+import { WidgetBase } from './widgetBase';
+
+export class TextAreaWidget extends WidgetBase {
+    protected onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+        this.value = evt.currentTarget.value;
+        this.observeObj[this.dataItem.name] = this.value;
+    }
+
+    render() {
+        return <textarea defaultValue={this.defaultValue} onChange={this.onChange} />
+    }
+}
