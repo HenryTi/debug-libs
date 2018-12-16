@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { WidgetBase } from './widgetBase';
+import { TextWidget } from './textWidget';
 
-export class NumberWidget extends WidgetBase {
-    render() {
-        return <input type="number" defaultValue={this.defaultValue} onChange={this.onChange} />
-    }
+export class NumberWidget extends TextWidget {
+    protected inputType = 'number';
 }

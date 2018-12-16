@@ -1,4 +1,4 @@
-export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr';
+export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button';
 
 export interface DataItem {
     name: string;
@@ -37,6 +37,10 @@ export interface DataArr extends DataItem {
     type: 'arr';
     arr: DataItem[];
     dict: {[name:string]: DataItem};
+}
+
+export interface DataButton extends DataItem {
+    type: 'button';
 }
 
 export type Schema = DataItem[];

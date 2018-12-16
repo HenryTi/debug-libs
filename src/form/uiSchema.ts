@@ -1,4 +1,6 @@
-export type UiType = 'arr' | 'group' | 'text' | 'textarea' | 'password' 
+import { Form } from './form';
+
+export type UiType = 'arr' | 'group' | 'button' | 'text' | 'textarea' | 'password' 
     | 'date' | 'datetime' | 'select' | 'url' | 'email'
     | 'updown' | 'color' | 'checkbox' | 'checkboxes' | 'radio' | 'range';
 
@@ -7,6 +9,7 @@ export interface UiItem {
     readonly?: boolean;
     disabled?: boolean;
     label?: string;
+    className?: string;
 }
 
 export interface UiInputItem extends UiItem {
@@ -24,7 +27,8 @@ export interface UiTextAreaItem extends UiInputItem {
 
 export interface UiArr extends UiItem {
     widget: 'arr';
-    items: {[field: string]: UiItem};
+    items?: {[field: string]: UiItem};
+    Templet?: (form:Form, data:any, uiArr:UiArr, row:any) => JSX.Element;
 }
 
 export interface UiGroup extends UiItem {
@@ -32,8 +36,12 @@ export interface UiGroup extends UiItem {
     with: string[];     // field names
 }
 
+export interface UiButton extends UiItem {
+    widget: 'button';
+}
+
 export interface UiForm {
-    items: {
+    items?: {
         [field: string]: UiItem;
     }
 }
