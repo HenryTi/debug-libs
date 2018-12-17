@@ -132,7 +132,7 @@ export const ArrContainer = observer((
 {
     let {name, arr, dict} = di;
     let arrLabel = name;
-    let Templet:(form:Form, data:any, uiArr:UiArr, row:any) => JSX.Element;
+    let Templet:React.StatelessComponent<{form:Form, data:any, uiArr:UiArr, row:any}>;
     if (ui !== undefined) {
         let {widget:widgetType, label} = ui;
         Templet = ui.Templet;
@@ -171,7 +171,7 @@ export const ArrContainer = observer((
                 };
                 return <FormContext.Provider key={index} value={arrContext}>
                     {sep}
-                    {Templet(form, data, ui, row)}
+                    {<Templet form={form} data={data} uiArr={ui} row={row} />}
                 </FormContext.Provider >;
             }
             let content = <>{

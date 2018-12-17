@@ -1,4 +1,5 @@
 import { Form } from './form';
+import { StatelessComponent } from 'react';
 
 export type UiType = 'arr' | 'group' | 'button' | 'text' | 'textarea' | 'password' 
     | 'date' | 'datetime' | 'select' | 'url' | 'email'
@@ -28,7 +29,7 @@ export interface UiTextAreaItem extends UiInputItem {
 export interface UiArr extends UiItem {
     widget: 'arr';
     items?: {[field: string]: UiItem};
-    Templet?: (form:Form, data:any, uiArr:UiArr, row:any) => JSX.Element;
+    Templet?: StatelessComponent;
 }
 
 export interface UiGroup extends UiItem {

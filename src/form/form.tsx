@@ -111,7 +111,8 @@ export class Form extends React.Component<FormProps> {
         else {
             inNode = false;
             content = <>{this.schema.map((v, index) => {
-                return <React.Fragment key={index}>{factory(this, undefined, v, this.uiSchema[v.name], this.data, children, false)}</React.Fragment>
+                let that = this;
+                return <React.Fragment key={index}>{factory(that, undefined, v, that.uiSchema.items[v.name], that.data, children, false)}</React.Fragment>
             })}</>;
         }
         return <FormContext.Provider value={{form: this, dict: this.dict, uiSchema: this.uiSchema, data: this.data, inNode:inNode, diArr:undefined }}>
