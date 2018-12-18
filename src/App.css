@@ -26,3 +26,19 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.deleted {
+  text-decoration: line-through;
+}
+.deleted label {
+  text-decoration: line-through;
+}
+fieldset.edit-container {
+  display: block;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-block-start: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  padding-block-end: 0;
+  min-inline-size: min-content;
+}

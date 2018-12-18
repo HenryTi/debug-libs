@@ -2,17 +2,15 @@ import * as React from 'react';
 import './App.css';
 
 import logo from './logo.svg';
-import { Form, Field, UiForm, Schema, DataArr, UiArr } from './form';
+import { Form, Field, UiSchema, Schema, ArrSchema, UiArr } from './form';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
 const schema: Schema = [
-  /*
   {name: 'number', type: 'number'}, 
   {name: 'integer', type: 'integer'}, 
   {name: 'date', type: 'date'},
   {name: 'text', type: 'string'},
-  */
   {
     name: 'arr1', 
     type: 'arr', 
@@ -21,13 +19,13 @@ const schema: Schema = [
       {name: 'arr1-c', type: 'string'},
       {name: 'arr1-b', type: 'string'}, 
       {name: 'arr1-a', type: 'string'},
-      {name: 'add', type: 'button'}
+      //{name: 'add', type: 'button'}
     ]
-  } as DataArr,
+  } as ArrSchema,
   {name: 'submit', type: 'button'}
 ];
 
-const ArrTemplet = ({form, data, uiArr, row}:{form:Form, data:any, uiArr:UiArr, row:any}) => {
+const ArrTemplet = observer(({form, data, uiArr, row}:{form:Form, data:any, uiArr:UiArr, row:any}) => {
   let arr1A = row['arr1-a'];
   return <>
     <div className="d-flex" style={{textDecoration: 'line-through'}}>
@@ -45,15 +43,15 @@ const ArrTemplet = ({form, data, uiArr, row}:{form:Form, data:any, uiArr:UiArr, 
         </div>
         <Field name="add" />
     </div>
-</>};
+</>});
 
 const formData = {
   a: 'aa', b: 'bb', c: 'ccc',
   number: '2', integer: '3',
   text: '???',
   arr1: [
-    {'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0'},
-    {'arr1-b': 'arb--dddd1', 'arr1-c': 'arr1-c-cc-cc1'}
+    {$a:1, 'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0'},
+    {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'arr1-c-cc-cc1'}
   ]
 };
 
@@ -75,30 +73,44 @@ row data: ${JSON.stringify(row)}
     alert(msg);
   }
 
-  change = observer(()=> {
-    return <>{
-      this.arr.map((v, index) => {
-        let b = <input onChange={()=>{
-          this.a = this.a === 1? 0:1;
-          v.label += this.a === 1? 'a' : 'b';
-        }} />;
-        return <Field name="arr1" key={index}><React.Fragment key={index}>
-          {this.a === 1? "a11111":"a00000"} - {v.label} -
-          {b}
-          <Field name="arr1-b" />
-        </React.Fragment>
-        </Field>
-      })
-    }
-    </>
+  change = observer(({form, data, uiArr, row}:{form:Form, data:any, uiArr:UiArr, row:any})=> {
+    let onChange = ()=>{
+      if (row.$a === 1) {
+        row.$a = 0;
+      }
+      else {
+        row.$a = 1;
+      }
+    };
+    let B = () => <input onChange={onChange} />;
+
+    //let arr1A = row['arr1-a'];
+    return <React.Fragment>
+      <Field name="arr1-a" onChanged={onChange} />
+      {row.$a !== 1? <span style={{textDecoration:'line-through'}}>a11111</span>: <span>a00000</span>} - {row['arr1-c']} -
+      {<B />}
+      {row.$a && <Field name="arr1-b" />}
+      {row.$a === 1? <Field name="arr1-b" />:<Field name="arr1-c" />}
+    </React.Fragment>
   });
 
-  private uiSchema: UiForm = {
+  private uiSchema: UiSchema = {
     items: {
       a: {widget: 'text'},
       submit: {widget: 'button', className: 'btn-primary'},
       arr1: {widget: 'arr', Templet: this.change} as UiArr
-    }
+    },
+    Templet: () => <div><div>af sasdf as fd<b>dasdf asdf sad</b><Field name="number"/> &nbsp;
+        <Field name="integer"/>&nbsp; <i>adsfas dfasdf asd fas fda</i>
+      </div>
+      <div className="font-weight-bold text-success h3">nnn<Field name="date"/><br /></div>
+      <div className="font-weight-bold text-success h3">text<Field name="text"/></div>
+      <Field name='arr1' />
+      <Field name='submit' />
+      </div>,
+    selectable: true,
+    deletable: true,
+    restorable: true,
   }
   
   public render() {

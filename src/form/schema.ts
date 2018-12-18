@@ -1,46 +1,46 @@
 export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button';
 
-export interface DataItem {
+export interface ItemSchema {
     name: string;
     required?: boolean;
     type: DataType;
 }
 
-export interface DataNumBase extends DataItem {
+export interface NumBaseSchema extends ItemSchema {
     type: 'integer' | 'number';
     min?: number;
     max?: number;
 }
 
-export interface DataInt extends DataNumBase {
+export interface IntSchema extends NumBaseSchema {
     type: 'integer';
 }
 
-export interface DataNum extends DataNumBase {
+export interface NumSchema extends NumBaseSchema {
     type: 'number';
 }
 
-export interface DataBool extends DataItem {
+export interface BoolSchema extends ItemSchema {
     type: 'boolean';
 }
 
-export interface DataString extends DataItem {
+export interface StringSchema extends ItemSchema {
     type: 'string';
     maxLength?: number;
 }
 
-export interface DataDate extends DataItem {
+export interface DateSchema extends ItemSchema {
     type: 'date';
 }
 
-export interface DataArr extends DataItem {
+export interface ArrSchema extends ItemSchema {
     type: 'arr';
-    arr: DataItem[];
-    dict: {[name:string]: DataItem};
+    arr: ItemSchema[];
+    itemSchemas: {[name:string]: ItemSchema};
 }
 
-export interface DataButton extends DataItem {
+export interface ButtonSchema extends ItemSchema {
     type: 'button';
 }
 
-export type Schema = DataItem[];
+export type Schema = ItemSchema[];

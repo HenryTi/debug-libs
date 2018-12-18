@@ -1,7 +1,8 @@
 import { Form } from './form';
 import { StatelessComponent } from 'react';
 
-export type UiType = 'arr' | 'group' | 'button' | 'text' | 'textarea' | 'password' 
+export type UiType =  'form' | 'arr' | 'group' | 'button' 
+    | 'text' | 'textarea' | 'password' 
     | 'date' | 'datetime' | 'select' | 'url' | 'email'
     | 'updown' | 'color' | 'checkbox' | 'checkboxes' | 'radio' | 'range';
 
@@ -26,10 +27,23 @@ export interface UiTextAreaItem extends UiInputItem {
     rows?: number;
 }
 
-export interface UiArr extends UiItem {
-    widget: 'arr';
-    items?: {[field: string]: UiItem};
+export interface UiItemCollection {
+    [field: string]: UiItem;
+}
+
+export interface UiSchema {
+    items?: UiItemCollection;
     Templet?: StatelessComponent;
+    readonly?: boolean;
+    disabled?: boolean;
+    className?: string;
+    selectable?: boolean;
+    deletable?: boolean;
+    restorable?: boolean;
+}
+
+export interface UiArr extends UiSchema, UiItem {
+    widget: 'arr';
 }
 
 export interface UiGroup extends UiItem {
@@ -39,10 +53,4 @@ export interface UiGroup extends UiItem {
 
 export interface UiButton extends UiItem {
     widget: 'button';
-}
-
-export interface UiForm {
-    items?: {
-        [field: string]: UiItem;
-    }
 }

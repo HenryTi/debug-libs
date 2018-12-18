@@ -4,7 +4,7 @@ import { WidgetBase } from './widgetBase';
 export class TextAreaWidget extends WidgetBase {
     protected onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
         this.value = evt.currentTarget.value;
-        this.observeObj[this.dataItem.name] = this.value;
+        this.observeObj[this.itemSchema.name] = this.value;
     }
 
     render() {
