@@ -26,11 +26,16 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-.deleted {
-  text-decoration: line-through;
+.form-row-checkbox {
+  height: 1.1em;
+  width: 2em;
 }
-.deleted label {
-  text-decoration: line-through;
+.cursor-pointer {
+  cursor: pointer;
+}
+.deleted, .deleted label, .deleted input {
+  text-decoration: line-through rgb(255, 127, 127);
+  color: gray;
 }
 fieldset.edit-container {
   display: block;

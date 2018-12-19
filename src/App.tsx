@@ -5,9 +5,11 @@ import logo from './logo.svg';
 import { Form, Field, UiSchema, Schema, ArrSchema, UiArr } from './form';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
+import { ArrRow } from './form/arrRow';
+import { Context } from './form/context';
 
 const schema: Schema = [
-  {name: 'number', type: 'number'}, 
+  {name: 'number', type: 'number', required: true},
   {name: 'integer', type: 'integer'}, 
   {name: 'date', type: 'date'},
   {name: 'text', type: 'string'},
@@ -19,6 +21,8 @@ const schema: Schema = [
       {name: 'arr1-c', type: 'string'},
       {name: 'arr1-b', type: 'string'}, 
       {name: 'arr1-a', type: 'string'},
+      {name: 'n1', type: 'integer'},
+      {name: 'n2', type: 'integer'},
       //{name: 'add', type: 'button'}
     ]
   } as ArrSchema,
@@ -58,41 +62,46 @@ const formData = {
 class App extends React.Component {
   @observable a = 1;
   @observable arr:any[] = [{label:'a', v:1}, {label:'b', v:2}];
-  onFormButtonClick = (name:string, data:any, arrName:string, row:any) => {
+  onFormButtonClick = (name:string, context:Context) => {
     let msg:string;
-    if (arrName === undefined) {
+    if (context.isRow === false) {
       msg = `button ${name} clicked!
+      form data: ${JSON.stringify(context.form.data)}
 `
     }
     else {
-      msg = `button ${arrName}.${name} clicked!
-row data: ${JSON.stringify(row)}
+      msg = `button ${context.arrName}.${name} clicked!
+row data: ${JSON.stringify(context.data)}
+form data: ${JSON.stringify(context.form.data)}
 `;
     }
-    msg += JSON.stringify(data);
     alert(msg);
   }
 
-  change = observer(({form, data, uiArr, row}:{form:Form, data:any, uiArr:UiArr, row:any})=> {
-    let onChange = ()=>{
-      if (row.$a === 1) {
-        row.$a = 0;
-      }
-      else {
-        row.$a = 1;
-      }
-    };
-    let B = () => <input onChange={onChange} />;
+  private onBChange = (row:any)=>{
+    if (row.$a === 1) {
+      row.$a = 0;
+    }
+    else {
+      row.$a = 1;
+    } 
+  };
 
+  change = ({uiArr, data}:ArrRow)=> {
+    //let onChange = 
+    let B = observer(() => <input onChange={()=>this.onBChange(data)} placeholder="BBBBB Changed" />);
+    let {n1, n2} = data;
     //let arr1A = row['arr1-a'];
     return <React.Fragment>
-      <Field name="arr1-a" onChanged={onChange} />
-      {row.$a !== 1? <span style={{textDecoration:'line-through'}}>a11111</span>: <span>a00000</span>} - {row['arr1-c']} -
-      {<B />}
-      {row.$a && <Field name="arr1-b" />}
-      {row.$a === 1? <Field name="arr1-b" />:<Field name="arr1-c" />}
+      <Field name="arr1-a" onChanged={(value:any, prev:any) => data['arr1-b']=value} />
+      {data.$a !== 1? <span style={{textDecoration:'line-through'}}>a11111</span>: <span>a00000</span>} - {data['arr1-c']} -
+      <input onChange={()=>this.onBChange(data)} placeholder="BBBBB Changed" />
+      {data.$a && <Field name="arr1-b" />}
+      {data.$a === 1? <Field name="arr1-b" />:<Field name="arr1-c" />}
+      <Field name="n1" /><Field name="n2" />
+      <div className="font-weight-bold">{data['n1']*data['n2']}</div>
     </React.Fragment>
-  });
+  };
 
   private uiSchema: UiSchema = {
     items: {

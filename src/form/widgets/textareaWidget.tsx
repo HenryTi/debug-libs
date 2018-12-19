@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { WidgetBase } from './widgetBase';
+import { Widget } from './widget';
 
-export class TextAreaWidget extends WidgetBase {
+export class TextAreaWidget extends Widget {
+    protected input: HTMLTextAreaElement;
+
+    protected setElementValue(value:any) {this.input.value = value}
     protected onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-        this.value = evt.currentTarget.value;
-        this.observeObj[this.itemSchema.name] = this.value;
+        this.setValue(evt.currentTarget.value);
     }
 
     render() {
-        return <textarea defaultValue={this.defaultValue} onChange={this.onChange} />
+        return <textarea ref={(input) => this.input=input} defaultValue={this.defaultValue} onChange={this.onChange} />
     }
 }

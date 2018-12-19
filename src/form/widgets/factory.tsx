@@ -2,10 +2,10 @@ import * as React from 'react';
 import {observer} from 'mobx-react';
 import classNames from 'classnames';
 import { Schema, ArrSchema, DataType, ButtonSchema, ItemSchema } from '../schema';
-import { UiItem, UiArr, UiType, UiButton } from '../uiSchema';
-import { ContextValue, FormContext, Form } from '../form';
+import { UiItem, UiArr, UiType, UiButton, TempletType } from '../uiSchema';
+//import { ContextValue, FormContext, Form } from '../form';
 import { TextWidget } from './textWidget';
-import { WidgetBase } from './widgetBase';
+import { Widget } from './widget';
 import { TextAreaWidget } from './textareaWidget';
 import { PasswordWidget } from './passwordWidget';
 import { UpdownWidget } from './updownWidget';
@@ -13,10 +13,12 @@ import { NumberWidget } from './numberWidget';
 import { DateWidget } from './dateWidget';
 import { CheckBoxWidget } from './checkBoxWidget';
 import { FieldProps } from '../field';
+import { ArrRow } from '../arrRow';
+import { Context, RowContext, FormContext, ContextContainer } from '../context';
 
-type WidgetClass = new (form:Form, fieldProps:FieldProps, inNode:boolean, itemSchema:ItemSchema, ui: UiItem, observeObj: any, defaultValue: any) => WidgetBase;
+type TypeWidget = new (context:Context, itemSchema:ItemSchema, fieldProps:FieldProps) => Widget;
 
-const widgetsFactory: {[type: string]: {widget?: WidgetClass, dataTypes?: DataType[]}} = {
+const widgetsFactory: {[type: string]: {widget?: TypeWidget, dataTypes?: DataType[]}} = {
     text: {
         dataTypes: ['integer', 'number', 'string'],
         widget: TextWidget
@@ -67,30 +69,31 @@ const widgetsFactory: {[type: string]: {widget?: WidgetClass, dataTypes?: DataTy
     }
 }
 
-export function factory(form: Form, fieldProps:FieldProps, itemSchema: ItemSchema, ui: UiItem, data:any, children:React.ReactNode, inNode:boolean, arrSchema?: ArrSchema):JSX.Element {
+//export function factory(form: Form, fieldProps:FieldProps, itemSchema: ItemSchema, ui: UiItem, data:any, children:React.ReactNode, inNode:boolean, arrSchema?: ArrSchema):JSX.Element {
+export function factory(context: Context, itemSchema: ItemSchema, children:React.ReactNode, fieldProps?: FieldProps):JSX.Element {
     if (itemSchema === undefined) return undefined;
     let {name, type} = itemSchema;
-    let val = data[name];
-    let widget: WidgetClass;
     switch (type) {
     case 'button':
-        return <FormButton form={form} itemSchema={itemSchema as ButtonSchema} ui={ui as UiButton} children={children} arrSchema={arrSchema} row={data} />;
+        return <FormButton context={context} itemSchema={itemSchema as ButtonSchema} children={children} />;
     case 'arr':
-        if (arrSchema !== undefined) return undefined;
-        return <ArrComponent form={form} arrSchema={itemSchema as ArrSchema} ui={ui as UiArr} data={val} children={children} />;
+        let arrSchema = context.getItemSchema(name) as ArrSchema;
+        return <ArrComponent formContext={context as FormContext} arrSchema={arrSchema} children={children} />;
     default:
         break;
     }
+    let typeWidget: TypeWidget;
     let fieldLabel:string;
+    let ui = context.getUiItem(name);
     if (ui === undefined) {
         fieldLabel = name;
         switch(type) {
-        default: widget = TextWidget; break;
-        case 'integer': widget = UpdownWidget; break;
-        case 'number': widget = NumberWidget; break;
-        case 'string': widget = TextWidget; break;
-        case 'date': widget = DateWidget; break;
-        case 'boolean': widget = CheckBoxWidget; break;
+        default: typeWidget = TextWidget; break;
+        case 'integer': typeWidget = UpdownWidget; break;
+        case 'number': typeWidget = NumberWidget; break;
+        case 'string': typeWidget = TextWidget; break;
+        case 'date': typeWidget = DateWidget; break;
+        case 'boolean': typeWidget = CheckBoxWidget; break;
         }
     }
     else {        
@@ -99,51 +102,58 @@ export function factory(form: Form, fieldProps:FieldProps, itemSchema: ItemSchem
         switch (widgetType) {
         default:
             let widgetFactory = widgetsFactory[widgetType];
-            widget = widgetFactory.widget;
-            if (widget === undefined) return Unknown(type, widgetType, widgetFactory.dataTypes)
+            typeWidget = widgetFactory.widget;
+            if (typeWidget === undefined) return Unknown(type, widgetType, widgetFactory.dataTypes)
             break;
         case 'group':
             return <span>impletment group</span>;
         }
     }
     
-    if (arrSchema === undefined) {
-        let WidgetElement = observer(() => new widget(form, fieldProps, inNode, itemSchema, ui, data, val).render());
+    let {form, isRow, inNode, widgets} = context;
+    let widget = new typeWidget(context, itemSchema, fieldProps);
+    widgets[name] = widget;
+    if (isRow === false) {
+        let WidgetElement = observer(() => widget.render());
         if (inNode === true) return <WidgetElement />;
-        return form.FieldContainer(fieldLabel, <WidgetElement />, arrSchema);
+        return form.FieldContainer(fieldLabel, <WidgetElement />, context);
     }
     else {
-        let widgetElement = new widget(form, fieldProps, inNode, itemSchema, ui, data, val).render();
+        let widgetElement = widget.render();
         if (inNode === true) return widgetElement;
-        return form.FieldContainer(fieldLabel, widgetElement, arrSchema);
+        return form.FieldContainer(fieldLabel, widgetElement, context);
     }
 }
 
-const FormButton = ({form, itemSchema: di, ui, children, arrSchema: arrSchema, row}:{form: Form, itemSchema: ButtonSchema, ui: UiButton, children: React.ReactNode, arrSchema: ArrSchema, row: any}) => {
+const FormButton = ({context, itemSchema, children}:{context: Context, itemSchema: ButtonSchema, children: React.ReactNode}) => {
+    let {name} = itemSchema;
+    let ui: UiButton = context.getUiItem(name) as UiButton;
     if (ui !== undefined) {
         let {widget:widgetType} = ui;
-        if (widgetType !== 'button') return Unknown(di.type, widgetType, ['button']);
+        if (widgetType !== 'button') return Unknown(itemSchema.type, widgetType, ['button']);
     }
-    let {name} = di;
+    let {form} = context;
     function onClick() {
         let {onButtonClick} = form.props;
         if (onButtonClick === undefined) {
             alert(`button ${name} clicked`);
             return;
         }
-        let data = form.data;
-        onButtonClick(name, data, arrSchema && arrSchema.name, row);
+        onButtonClick(name, context);
     }
     return <button className={classNames(form.ButtonClass, ui && ui.className)} type="button" onClick={onClick}>{name}</button>;
 }
 
 const ArrComponent = observer((
-    {form, arrSchema, ui, data, children}:{form: Form, arrSchema: ArrSchema, ui: UiArr, data:any[], children: React.ReactNode}) => 
+    {formContext, arrSchema, children}:{formContext: FormContext, arrSchema: ArrSchema, children: React.ReactNode}) => 
 {
-    let {name, arr, itemSchemas} = arrSchema;
+    let {name, arr} = arrSchema;
+    let data = formContext.data[name] as any[];
+    let {form} = formContext;
+    let ui = formContext.getUiItem(name) as UiArr;
     let arrLabel = name;
-    let Templet:React.StatelessComponent<{form:Form, data:any, uiArr:UiArr, row:any}>;
-    let selectable:boolean, deletable:boolean, restorable:boolean;
+    let Templet:TempletType;
+    let selectable:boolean, deletable:boolean, restorable:boolean;    
     if (ui !== undefined) {
         let {widget:widgetType, label, selectable:arrSelectable, deletable:arrDeletable, restorable:arrRestorable} = ui;
         selectable = arrSelectable;
@@ -153,7 +163,7 @@ const ArrComponent = observer((
         if (widgetType !== 'arr') return Unknown(arrSchema.type, widgetType, ['arr']);
         arrLabel = label || arrLabel;
     }
-    let {ArrContainer, RowContainer, RowEditContainer, uiSchema} = form;
+    let {ArrContainer, RowContainer, uiSchema} = form;
     if (uiSchema !== undefined) {
         let {selectable:formSelectable, deletable:formDeletable, restorable:formRestorable} = uiSchema;
         if (selectable !== true) selectable = formSelectable;
@@ -162,14 +172,20 @@ const ArrComponent = observer((
     }
     let first = true;
     return ArrContainer(arrLabel, <>
-        {data.map((row, index) => {
+        {data.map((row:any, index) => {
+            let arrRow = row.$row;
+            if (arrRow === undefined) {
+                row.$row = arrRow = new ArrRow(form, arrSchema, row);
+            }
+            let rowKey = arrRow.key;
+
             let selectCheck:JSX.Element, deleteIcon:JSX.Element;
             if (selectable === true) {
                 let onClick = (evt: React.MouseEvent<HTMLInputElement>)=>{
                     row.$isSelected=(evt.target as HTMLInputElement).checked;
                 }
                 selectCheck = <div>
-                    <input className="mt-1" style={{width:'2em', height:'1.3em'}} type="checkbox" onClick={onClick} />
+                    <input className="mt-1 form-row-checkbox" type="checkbox" onClick={onClick} />
                 </div>;
             }
             let isDeleted = !(row.$isDeleted===undefined || row.$isDeleted===false);
@@ -184,7 +200,7 @@ const ArrComponent = observer((
                         if (p>=0) data.splice(p, 1);
                     }
                 }
-                deleteIcon = <div className="m-1 align-self-start text-info" onClick={onDelClick} style={{cursor: "pointer"}}>
+                deleteIcon = <div className="m-1 align-self-start text-info cursor-pointer" onClick={onDelClick}>
                     <i className={classNames('fa', icon, 'fa-fw')} />
                 </div>;
             }
@@ -195,59 +211,37 @@ const ArrComponent = observer((
                 :
                 (content:any) => content;
 
+            let rowContext: RowContext;
             let sep = undefined;
             if (first === false) sep = form.RowSeperator;
             else first = false;
             if (children !== undefined) {
-                let arrContext: ContextValue = {
-                    form: form,
-                    uiSchema: ui,
-                    data: row,
-                    inNode: true,
-                    arrSchema: arrSchema,
-                };
-                return <FormContext.Provider key={index} value={arrContext}>
+                rowContext = new RowContext(formContext, arrSchema, row, true);
+                return <ContextContainer.Provider key={rowKey} value={rowContext}>
                     {sep}
                     {editContainer(<>children</>)}
-                </FormContext.Provider >;
+                </ContextContainer.Provider >;
             }
             if (Templet !== undefined) {
-                let arrContext: ContextValue = {
-                    form: form,
-                    uiSchema: ui,
-                    data: row,
-                    inNode: true,
-                    arrSchema: arrSchema,
-                };
-                return <FormContext.Provider key={index} value={arrContext}>
+                rowContext = new RowContext(formContext, arrSchema, row, true);
+                return <ContextContainer.Provider key={rowKey} value={rowContext}>
                     {sep}
-                    {editContainer(<Templet form={form} data={data} uiArr={ui} row={row} />)}
-                </FormContext.Provider >;
+                    {editContainer(React.createElement(observer(Templet), arrRow))}
+                </ContextContainer.Provider >;
             }
+            rowContext = new RowContext(formContext, arrSchema, row, false);
             let content = <>{
                 arr.map((v, index) => {
-                    let uiItem:UiItem;
-                    if (ui !== undefined) {
-                        let {items} = ui;
-                        if (items !== undefined) uiItem = items[v.name];
-                    }
-                    return <React.Fragment key={index}>
-                        {factory(form, undefined, v, uiItem, row, undefined, false, arrSchema)}
+                    return <React.Fragment key={v.name}>
+                        {factory(rowContext, v, undefined)}
                     </React.Fragment>
                 })}</>;
-                let arrContext: ContextValue = {
-                    form: form,
-                    uiSchema: ui,
-                    data: row,
-                    inNode: false,
-                    arrSchema: arrSchema,
-                };
-                return <FormContext.Provider key={index} value={arrContext}>
+                return <ContextContainer.Provider key={rowKey} value={rowContext}>
                     {sep}
                     {editContainer(RowContainer(content))}
-                </FormContext.Provider>;
+                </ContextContainer.Provider>;
         })}
-    </>);
+    </>, children !== undefined || Templet !== undefined);
 });
 
 const Unknown = (dataType:DataType, uiType:UiType, dataTypes:DataType[]) => {

@@ -1,5 +1,6 @@
 import { Form } from './form';
 import { StatelessComponent } from 'react';
+import { ArrRow } from './arrRow';
 
 export type UiType =  'form' | 'arr' | 'group' | 'button' 
     | 'text' | 'textarea' | 'password' 
@@ -31,9 +32,11 @@ export interface UiItemCollection {
     [field: string]: UiItem;
 }
 
+//export interface RowTempletProps {form:Form, data:any, uiArr:UiArr, rowData:any};
+export type TempletType = StatelessComponent<ArrRow>;
 export interface UiSchema {
     items?: UiItemCollection;
-    Templet?: StatelessComponent;
+    Templet?: TempletType;
     readonly?: boolean;
     disabled?: boolean;
     className?: string;
