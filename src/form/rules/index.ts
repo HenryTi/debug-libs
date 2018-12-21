@@ -62,6 +62,6 @@ export class RuleMax extends RuleNum {
     max: number;
     check(defy:string[], value:any) {
         super.check(defy, value);
-        if (Number(value) > this.max) defy.push('不能小于' + this.max);
+        if (Number(value) > this.max) defy.push('不能大于' + this.max);
     }
 }

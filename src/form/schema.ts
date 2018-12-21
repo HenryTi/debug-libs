@@ -1,4 +1,4 @@
-export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button';
+export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button' | 'submit';
 
 export interface ItemSchema {
     name: string;
@@ -40,7 +40,7 @@ export interface ArrSchema extends ItemSchema {
 }
 
 export interface ButtonSchema extends ItemSchema {
-    type: 'button';
+    type: 'button' | 'submit';
 }
 
 export type Schema = ItemSchema[];

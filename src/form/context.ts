@@ -3,6 +3,7 @@ import { Form } from './form';
 import { UiSchema, UiArr, UiItem } from './uiSchema';
 import { ArrSchema, ItemSchema } from './schema';
 import { Widget as Widget } from './widgets/widget';
+import { ArrRow } from './arrRow';
 
 export abstract class Context {    
     readonly form: Form;
@@ -26,7 +27,25 @@ export abstract class Context {
     setValue(itemName:string, value:any) {
         this.data[itemName] = value;
         let widget = this.widgets[itemName];
-        widget.setValue(value);
+        if (widget !== undefined) widget.setValue(value);
+    }
+    getDisabled(itemName:string):boolean {
+        let widget = this.widgets[itemName];
+        if (widget !== undefined) return widget.getDisabled();
+        return undefined;
+    }
+    setDisabled(itemName:string, value:boolean) {
+        let widget = this.widgets[itemName];
+        if (widget !== undefined) widget.setDisabled(value);
+    }
+    getReadOnly(itemName:string):boolean {
+        let widget = this.widgets[itemName];
+        if (widget !== undefined) widget.getReadOnly();
+        return undefined;
+    }
+    setReadOnly(itemName:string, value:boolean) {
+        let widget = this.widgets[itemName];
+        if (widget !== undefined) widget.setReadOnly(value);
     }
 }
 
@@ -34,7 +53,8 @@ export class RowContext extends Context {
     readonly formContext: FormContext;
     readonly arrSchema: ArrSchema;
     readonly uiSchema: UiArr;
-    constructor(formContext:FormContext, arrSchema: ArrSchema, data: any, inNode: boolean) {
+    readonly row: ArrRow;
+    constructor(formContext:FormContext, arrSchema: ArrSchema, data: any, inNode: boolean, row:ArrRow) {
         let uiArr:UiArr;
         let {form} = formContext;
         let {uiSchema} = form;
@@ -45,6 +65,7 @@ export class RowContext extends Context {
         super(formContext.form, uiArr, data, inNode);
         this.formContext = formContext;
         this.arrSchema = arrSchema;
+        this.row = row;
     }
     get isRow():boolean {return true};
     getItemSchema(itemName:string):ItemSchema {return this.arrSchema.itemSchemas[itemName]}

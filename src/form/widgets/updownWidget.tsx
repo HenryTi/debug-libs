@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { TextWidget } from './textWidget';
+import { NumberWidget } from './numberWidget';
 
-export class UpdownWidget extends TextWidget {
+export class UpdownWidget extends NumberWidget {
     protected inputType = 'number';
     protected onKeyDown = (evt:React.KeyboardEvent<HTMLInputElement>) => {
         let key = evt.keyCode;

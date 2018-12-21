@@ -1,24 +1,13 @@
 import * as React from 'react';
-import {observable} from 'mobx';
+import {observable, computed} from 'mobx';
 import classNames from 'classnames';
 import { Schema, ItemSchema, ArrSchema } from './schema';
 import { UiSchema, UiArr, UiItem } from './uiSchema';
 import { factory } from './widgets';
 import 'font-awesome/css/font-awesome.min.css';
 import { ContextContainer, FormContext, Context, RowContext } from './context';
+import { Widget } from './widgets/widget';
 
-/*
-export interface ContextValue {
-    readonly form: Form;
-    //readonly itemSchemas: {[name:string]: ItemSchema};
-    readonly uiSchema: UiSchema;
-    readonly data: any;
-    readonly inNode: boolean;           // true: 在</> 流中定义Field
-    readonly arrSchema: ArrSchema;
-}
-
-export const FormContext = React.createContext<ContextValue>({} as any);
-*/
 export type FormButtonClick = (name:string, context: Context) => void;
 
 export interface FormProps {
@@ -27,12 +16,12 @@ export interface FormProps {
     uiSchema: UiSchema;
     formData?: any;
     onButtonClick?: FormButtonClick;
-    Container?: (content:JSX.Element, inNode:boolean) => JSX.Element;
-    FieldContainer?: (label:any, content:JSX.Element, context:Context) => JSX.Element;
+    Container?: (content:JSX.Element) => JSX.Element;
+    FieldContainer?: (itemName:string, content:JSX.Element, context:Context) => JSX.Element;
     FieldClass?: string;
-    ArrContainer?: (label:any, content:JSX.Element, inNode:boolean) => JSX.Element;
+    ArrContainer?: (label:any, content:JSX.Element) => JSX.Element;
     RowContainer?: (content:JSX.Element) => JSX.Element;
-    ArrFieldContainer?: (label:any, content:JSX.Element, context:RowContext) => JSX.Element;
+    ArrFieldContainer?: (itemName:string, content:JSX.Element, context:RowContext) => JSX.Element;
     ButtonClass?: string;
     RowSeperator?: JSX.Element;
 }
@@ -41,15 +30,17 @@ export class Form extends React.Component<FormProps> {
     readonly schema: Schema;
     readonly itemSchemas: {[name:string]: ItemSchema};
     readonly uiSchema: UiSchema;
-    readonly Container: (content:JSX.Element, inNode:boolean) => JSX.Element;
+    readonly Container: (content:JSX.Element) => JSX.Element;
     readonly FieldContainer: (label:any, content:JSX.Element, context:Context) => JSX.Element;
     readonly FieldClass: string;
-    readonly ArrContainer: (label:any, content:JSX.Element, inNode:boolean) => JSX.Element;
+    readonly ArrContainer: (label:any, content:JSX.Element) => JSX.Element;
     readonly RowContainer: (content:JSX.Element) => JSX.Element;
     readonly ArrFieldContainer: (label:any, content:JSX.Element, context:RowContext) => JSX.Element;
     readonly ButtonClass: string;
     readonly RowSeperator: JSX.Element;
     @observable readonly data:any;
+    @observable errorWidgets:Widget[] = [];
+    @computed get hasError():boolean {return this.errorWidgets.length > 0};
 
     constructor(props:FormProps) {
         super(props);
@@ -116,13 +107,13 @@ export class Form extends React.Component<FormProps> {
             formContext = new FormContext(this, inNode);
         }
         else {
-            let Templet: React.StatelessComponent;
+            let Templet: React.StatelessComponent|JSX.Element;
             if (this.uiSchema !== undefined) {
                 Templet = this.uiSchema.Templet;
             }
             if (Templet !== undefined) {
                 inNode = true;
-                content = <Templet />;
+                content = typeof(Templet) === 'function'? <Templet /> : Templet;
                 formContext = new FormContext(this, inNode);
             }
             else {
@@ -133,42 +124,64 @@ export class Form extends React.Component<FormProps> {
                 })}</>;
             }
         }
-        //{form: this, itemSchemas: this.itemSchemas, uiSchema: this.uiSchema, data: this.data, inNode:inNode, arrSchema:undefined }
         return <ContextContainer.Provider value={formContext}>
-            {this.Container(content, inNode)}
+            {this.Container(content)}
         </ContextContainer.Provider>;
     }
 
-    protected DefaultContainer = (content:JSX.Element, inNode:boolean): JSX.Element => {
-        return <form className={classNames(inNode===true&&'form-inline', this.props.className)}>
+    addErrorWidget(widget:Widget) {
+        let pos = this.errorWidgets.findIndex(v => v === widget);
+        if (pos < 0) this.errorWidgets.push(widget);
+    }
+    removeErrorWidget(widget:Widget) {
+        let pos = this.errorWidgets.findIndex(v => v === widget);
+        if (pos >= 0) this.errorWidgets.splice(pos, 1);
+    }
+
+    protected DefaultContainer = (content:JSX.Element): JSX.Element => {
+        return <form className={classNames(this.props.className)}>
             {content}
         </form>;
     }
-    protected DefaultArrFieldContainer = (label:any, content:JSX.Element, context:RowContext): JSX.Element => {
-        return <div className="col"><div className="form-group">
-            <label>{label}</label>
-            {content}
-        </div></div>;
+    protected DefaultArrFieldContainer = (itemName:string, content:JSX.Element, context:RowContext): JSX.Element => {
+        return this.InnerFieldContainer(itemName, content, context);
     }
-    protected DefaultFieldContainer = (label:any, content:JSX.Element, context:Context): JSX.Element => {
+    protected DefaultFieldContainer = (itemName:string, content:JSX.Element, context:Context): JSX.Element => {
         if (context.isRow === true) {
-            return this.ArrFieldContainer(label, content, context as RowContext);
+            return this.ArrFieldContainer(itemName, content, context as RowContext);
+        }
+        return this.InnerFieldContainer(itemName, content, context);
+    }
+    private InnerFieldContainer = (itemName:string, content:JSX.Element, context:Context): JSX.Element => {
+        let itemSchema = context.getItemSchema(itemName);
+        let {required} = itemSchema;
+        let ui = context.getUiItem(itemName);
+        let label:string;
+        if (ui === undefined) {
+            label = itemName;
+        }
+        else {
+            label = ui.label || itemName;
         }
         return <div className="form-group">
-            <label>{label}</label>
+            <label>{label}&nbsp;{required===true&&<span className="text-danger">*</span>}</label>
             {content}
         </div>;
     }
-    protected DefaultFieldClass = 'form-control';
-    protected DefaultArrContainer = (label:any, content:JSX.Element, inNode:boolean): JSX.Element => {
+    protected DefaultFieldClass:string = undefined;
+    protected DefaultArrContainer = (label:any, content:JSX.Element): JSX.Element => {
         return <div>
             <div className={classNames('small text-muted text-center bg-light py-1 px-3 mt-4 mb-1')}>{label}</div>
-            <div className="form-inline">{content}</div>
+            {content}
         </div>;
     }
     protected DefaultRowContainer = (content:JSX.Element): JSX.Element => {
-        return <div className="row">{content}</div>;
+        //return <div className="row">{content}</div>;
+        let cn = classNames({
+            'py-3': true
+        });
+        return <div className={cn}>{content}</div>
     }
-    protected DefaultButtonClass = 'btn';
-    protected DefaultRowSeperator = <div className="border border-light border-top my-3" />;
+    protected DefaultButtonClass = 'text-center py-2';
+    protected DefaultRowSeperator = <div className="border border-gray border-top" />;
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import { UiItem } from '../uiSchema';
+import { UiItem, ChangingHandler, ChangedHandler } from '../uiSchema';
 import { FieldProps } from '../field';
 import { Context } from '../context';
 import { ItemSchema } from '../schema';
@@ -15,9 +15,10 @@ export abstract class Widget {
     protected ui: UiItem;
     protected defaultValue: any;
     protected value: any;
-    protected input: HTMLElement;
     protected rules: Rule[];
     @observable protected errors: string[];
+    protected readOnly:boolean;
+    protected disabled:boolean;
 
     constructor(context:Context, itemSchema:ItemSchema, fieldProps:FieldProps) {
         this.context = context;
@@ -26,6 +27,15 @@ export abstract class Widget {
         this.itemSchema = itemSchema;
         this.fieldProps = fieldProps;
         this.ui = context.getUiItem(name);
+        if (this.ui === undefined) {
+            this.readOnly = false;
+            this.disabled = false;
+        }
+        else {
+            let {readOnly, disabled} = this.ui;
+            this.readOnly = (readOnly === true);
+            this.disabled = (disabled === true);
+        }
         this.value = this.defaultValue =  context.getValue(name); //defaultValue;
         this.init();
     }
@@ -44,7 +54,11 @@ export abstract class Widget {
     protected checkRules(): string[] {
         let defy:string[] = [];
         for (let r of this.rules) r.check(defy, this.value);
-        if (defy.length === 0) return undefined;
+        if (defy.length === 0) {
+            this.context.form.removeErrorWidget(this);
+            return undefined;
+        }
+        this.context.form.addErrorWidget(this);
         return defy;
     }
 
@@ -55,10 +69,15 @@ export abstract class Widget {
     }
 
     protected setElementValue(value:any) {}
-
-    setValue(value:any) {
+    protected setDataValue(value:any) {
+        if (this.isChanging === true) return;
         this.value = value;
         this.context.data[this.name] = value;
+    }
+
+    setValue(value:any) {
+        if (this.isChanging === true) return;
+        this.setDataValue(value);
         this.setElementValue(value);
     }
 
@@ -66,21 +85,40 @@ export abstract class Widget {
         return this.context.getValue(this.name);
     }
 
+    getReadOnly():boolean {return this.readOnly}
+    getDisabled():boolean {return this.disabled}
+    setReadOnly(value:boolean) {this.readOnly = value}
+    setDisabled(value:boolean) {this.disabled = value}
+
+    private isChanging: boolean;
     protected onChange = (evt: React.ChangeEvent<any>) => {
         let prev = this.value;
-        //this.value = evt.currentTarget.value;
-        //this.observeObj[this.itemSchema.name] = this.value;
-        this.setValue(evt.currentTarget.value);
-        if (this.fieldProps) {
-            let {onChanged} = this.fieldProps;
-            if (onChanged !== undefined) onChanged(this.value, prev);
+        let onChanging: ChangingHandler;
+        let onChanged: ChangedHandler;
+        if (this.ui !== undefined) {
+            onChanging = this.ui.onChanging;
+            onChanged = this.ui.onChanged;
+        }
+        let allowChange = true;
+        if (onChanging !== undefined) {
+            this.isChanging = true;
+            allowChange = onChanging(this.context, this.value, prev);
+            this.isChanging = false;
+        }
+        if (allowChange === true) {
+            this.setDataValue(evt.currentTarget.value);
+            if (onChanged !== undefined) {
+                this.isChanging = true;
+                onChanged(this.context, this.value, prev);
+                this.isChanging = false;
+            }
         }
     }
 
     protected get className():string {
         let fieldClass:string;
-        if (this.context.inNode === false) fieldClass = this.context.form.FieldClass;
-        return classNames(fieldClass, this.ui && this.ui.className, this.fieldProps && this.fieldProps.className);
+        if (this.context.inNode === false) fieldClass = 'form-control';
+        return classNames(fieldClass, this.context.form.FieldClass, this.ui && this.ui.className);
     }
 
     abstract render():JSX.Element;
