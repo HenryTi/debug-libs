@@ -2,6 +2,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import { Widget } from './widget';
 import { UiTextItem } from '../uiSchema';
+import { StringSchema } from '../schema';
 
 export class TextWidget extends Widget {
     protected inputType = 'text';
@@ -13,28 +14,27 @@ export class TextWidget extends Widget {
     protected onKeyDown: (evt:React.KeyboardEvent<HTMLInputElement>)=>void;
 
     protected onBlur = () => {
-        this.errors = this.checkRules();
-        //this.form.computeFields();
+        this.checkRules();
+        this.context.checkContextRules();
     }
     protected onFocus = () => {
-        this.errors = undefined;
-        this.context.form.removeErrorWidget(this);
+        this.clearError();
+        this.context.removeErrorWidget(this);
+        this.context.removeErrors();
     }
 
     setReadOnly(value:boolean) {this.input.readOnly = this.readOnly = value}
-    setDisabled(value:boolean) {this.input.disabled = this.disabled = value}
+    setDisabled(value:boolean) {
+        this.input.disabled = this.disabled = value
+    }
 
     render() {
-        let errors;
-        if (this.errors !== undefined) {
-            errors = this.errors.map(err => <span className="text-danger inline-block my-1 ml-3">
-                <i className="fa fa-exclamation-circle" /> &nbsp;{err}
-            </span>)
-        }
+        let renderTemplet = this.renderTemplet();
+        if (renderTemplet !== undefined) return renderTemplet;
         let cn = {
-            'form-control': true,
+            //'form-control': true,
         };
-        if (this.errors!==undefined) {
+        if (this.hasError === true) {
             cn['is-invalid'] = true;
         }
         else {
@@ -50,8 +50,9 @@ export class TextWidget extends Widget {
             disabled={this.disabled}
             onKeyDown = {this.onKeyDown}
             onFocus = {this.onFocus}
-            onBlur={this.onBlur} />
-            {errors}
+            onBlur={this.onBlur}
+            maxLength={(this.itemSchema as StringSchema).maxLength} />
+            {this.renderErrors()}
         </>;
     }
 }

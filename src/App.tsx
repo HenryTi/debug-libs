@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observable } from 'mobx';
-import { Form, Field, UiSchema, Schema, Context, ArrSchema, UiArr, IntSchema } from './form';
+import { Form, Field, UiSchema, Schema, Context, ArrSchema, UiArr, IntSchema, StringSchema, UiTextAreaItem, UiIdItem } from './form';
 import './App.css';
 import logo from './logo.svg';
 
@@ -8,10 +8,11 @@ console.log(typeof (<a />));
 console.log(typeof (()=>{}));
 
 const schema: Schema = [
+  {name: 'id', type: 'id', required: true},
   {name: 'number', type: 'number', required: true},
   {name: 'integer', type: 'integer', min:10, max: 30} as IntSchema, 
   {name: 'date', type: 'date'},
-  {name: 'text', type: 'string'},
+  {name: 'text', type: 'string', maxLength: 5} as StringSchema,
   {
     name: 'arr1', 
     type: 'arr', 
@@ -31,11 +32,12 @@ const schema: Schema = [
 
 const formData = {
   a: 'aa', b: 'bb', c: 'ccc',
-  number: '2', integer: '3',
+  number: 2, integer: 3,
   text: '???',
   arr1: [
-    {$a:1, 'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0'},
-    {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'arr1-c-cc-cc1'}
+    {$a:1, 'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0', n1:1},
+    {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'arr1-c-cc-cc1', n1:2},
+    {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'asd fsd farr1-c-cc-cc1', n1:3},
   ]
 };
 
@@ -47,7 +49,7 @@ const replacer = (key:string, value:any) => {
 class App extends React.Component {
   @observable a = 1;
   @observable arr:any[] = [{label:'a', v:1}, {label:'b', v:2}];
-  onFormButtonClick = (name:string, context:Context) => {
+  onFormButtonClick = async (name:string, context:Context) => {
     let msg:string;
     if (context.isRow === false) {
       msg = `button ${name} clicked!
@@ -61,6 +63,7 @@ form data: ${JSON.stringify(context.form.data, replacer)}
 `;
     }
     alert(msg);
+    return 'submit error';
   }
 
   private onBChange = (row:any)=>{
@@ -95,36 +98,56 @@ form data: ${JSON.stringify(context.form.data, replacer)}
   {data.$a === 1? <Field name="arr1-b" />:
   */
   private uiSchema: UiSchema = {
+    rules: (context:Context) => {
+      let n = context.getValue('number');
+      let i = context.getValue('integer');
+      if (n===i) return undefined;
+      return {integer: 'number must equal intege!'};
+    },
     items: {
+      id: {widget: 'id', pickId: async (context:Context, name:string, value:number)=>{alert('输入2');return 2;}} as UiIdItem,
+      text: {widget: 'textarea', rows: 7} as UiTextAreaItem,
       a: {widget: 'text'},
-      submit: {widget: 'button', className: 'btn btn-primary'},
+      integer: {
+        rules: (value:any) => {if (value === 19) return '不能为19';else return undefined}, 
+        //Templet:(context:Context, name:string, value:any)=><>{name}: {value}</>
+      },
+      submit: {widget: 'button', className: 'btn btn-primary', Templet: <><i className="fa fa-diamond" />&nbsp; 提交</>},
       arr1: {
         widget: 'arr', 
         Templet: this.arrTemplet1, // this.arrTemplet,
+        //rules: (context:Context) => {return 'err'},
         items: {
           "arr1-c": {className: "w-max-6c" },          
-          n1: {widget:'radio', className:'flex-grow-1', list:[{title:' - '},{value:1, title:'数字1'}, {value:2}]},
-          n2: {widget:'select', readOnly:true, list:[{value:null, title:' - '},{value:1, title:'数字1'}, {value:2}]},
+          n1: {widget:'radio', className:'flex-grow-1', defaultValue:2, list:[{value:1, title:'小提琴'}, {value:2, title:'钢琴'}, {value:3, title:'单簧管'}]},
+          n2: {widget:'select', list:[{value:null, title:' - '},{value:1, title:'数字1'}, {value:2}]},
           n3: {widget:'range'}
         }
       } as UiArr
     },
     Templet: () => <>
-      <div className="form-inline"><div>af sasdf as fd<b>dasdf asdf sad</b><Field name="number"/> &nbsp;
-        <Field name="integer"/>&nbsp; <i>adsfas dfasdf asd fas fda</i>
-      </div>
-      <div className="font-weight-bold text-success h3">nnn<Field name="date"/><br /></div>
-      <div className="font-weight-bold text-success h3">text<Field name="text"/></div>
+      <div className="form-inline">
+        <Field name="id" />
+        af sasdf as fd<b>dasdf asdf sad</b><Field name="number"/> &nbsp;
+        <Field name="integer" />&nbsp; <i>adsfas dfasdf asd fas fda</i>
+        <div className="font-weight-bold text-success h3">
+          nnn<Field name="date"/>
+          <br />
+        </div>
+        <div className="font-weight-bold text-success h3">
+          text<Field name="text"/>
+        </div>
       </div>
       <Field name='arr1' />
       <div className="text-center"><Field name='submit' /></div>
     </>,
-    selectable: true,
-    deletable: true,
-    restorable: true,
+    //selectable: true,
+    //deletable: true,
+    //restorable: true,
   }
   private uiSchema1: UiSchema = {
     items: {
+      id: {widget: 'id', pickId: async (context:Context, name:string, value:number)=>{return 2;}} as UiIdItem,
       a: {widget: 'text'},
       submit: {widget: 'button', className: 'btn btn-primary'},
       arr1: {
@@ -154,46 +177,23 @@ form data: ${JSON.stringify(context.form.data, replacer)}
         <div className="container text-left">
           <Form className="mb-3" 
             schema={schema} uiSchema={this.uiSchema} formData={formData} 
-            onButtonClick={this.onFormButtonClick} />
+            onButtonClick={this.onFormButtonClick}
+            beforeShow={context => {
+              //context.setDisabled('integer', true)
+            }} />
           <Form className="mb-3" 
             schema={schema} uiSchema={this.uiSchema1} formData={formData} 
-            onButtonClick={this.onFormButtonClick} />
+            onButtonClick={this.onFormButtonClick}
+            fieldLabelSize={2}
+            //FieldContainer={(label:string|JSX.Element, content:JSX.Element) => <></>} 
+            beforeShow={context => {
+              context.setVisible('date', false)
+            }} 
+            />
         </div>
       </div>
     );
   }
 }
-/*
-<Form className="mb-5" schema={schema} uiSchema={this.uiSchema}
-formData={formData}
-onButtonClick={this.onFormButtonClick}>
-<div>
-  af sasdf as fd<b>dasdf asdf sad</b><Field name="number"/> &nbsp;
-  <Field name="integer"/>&nbsp; <i>adsfas dfasdf asd fas fda</i>
-</div>
-<div className="font-weight-bold text-success h3">nnn<Field name="date"/><br /></div>
-<div className="font-weight-bold text-success h3">text<Field name="text"/></div>
-<Field name='arr1' />
-<Field name='submit' />
-</Form>
-*/
-/*
-            // {<this.change />}
-          </Form>
-<div className="d-flex" style={{textDecoration: 'line-through'}}>
-<div style={{width: '2em'}}><Field name="selected" /></div>
-  asdf asdf asf sadf asd f
-    <Field name="arr1-b" className="form-control" />
-  <div className="form-group">
-    <label>ddd</label><Field name="arr1-c" className="form-control" />
-  </div>
-  <div className="form-group">
-    <label>dbb</label><Field name="arr1-a" className="form-control" />
-  </div>
-  <Field name="add" />
-</div>
-</Field>
-*/
-//<Field name="arr1-b" /><Field name="arr1-c" />
 
 export default App;

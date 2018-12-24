@@ -4,75 +4,112 @@ import { UiItem, ChangingHandler, ChangedHandler } from '../uiSchema';
 import { FieldProps } from '../field';
 import { Context } from '../context';
 import { ItemSchema } from '../schema';
-import { Rule, RuleRequired } from '../rules';
+import { Rule, RuleRequired, RuleCustom, FieldRule } from '../rules';
 import { computed, observable } from 'mobx';
 
 export abstract class Widget {
     protected name: string;
     protected context: Context;
     protected fieldProps:FieldProps;
+    protected children: React.ReactNode;
     protected itemSchema: ItemSchema;
     protected ui: UiItem;
     protected defaultValue: any;
     protected value: any;
     protected rules: Rule[];
-    @observable protected errors: string[];
+    @observable protected errors: string[] = [];
+    @observable protected contextErrors: string[] = [];
+    @computed protected get hasError():boolean {return (this.errors.length + this.contextErrors.length)>0}
     protected readOnly:boolean;
     protected disabled:boolean;
+    @observable visible:boolean;
 
-    constructor(context:Context, itemSchema:ItemSchema, fieldProps:FieldProps) {
+    constructor(context:Context, itemSchema:ItemSchema, fieldProps:FieldProps, children: React.ReactNode) {
         this.context = context;
         let {name} = itemSchema;
         this.name = name;
         this.itemSchema = itemSchema;
         this.fieldProps = fieldProps;
+        this.children = children;
         this.ui = context.getUiItem(name);
         if (this.ui === undefined) {
             this.readOnly = false;
             this.disabled = false;
+            this.visible = true;
         }
         else {
-            let {readOnly, disabled} = this.ui;
+            let {readOnly, disabled, visible} = this.ui;
             this.readOnly = (readOnly === true);
             this.disabled = (disabled === true);
+            this.visible = !(visible === false);            
         }
         this.value = this.defaultValue =  context.getValue(name); //defaultValue;
         this.init();
     }
 
     protected init() {
+        this.rules = [];
+        if (this.itemSchema.required === true) {
+            this.rules.push(new RuleRequired(this.context.form.res));
+        }
         this.buildRules();
+        if (this.ui === undefined) return;
+        let {rules} = this.ui;
+        if (rules === undefined) return;
+        if (Array.isArray(rules) === false) {
+            this.rules.push(new RuleCustom(rules as FieldRule));
+            return;
+        }
+        for (let rule of rules as FieldRule[]) {
+            this.rules.push(new RuleCustom(rule));
+        }
     }
 
     protected buildRules() {
-        this.rules = [];
-        if (this.itemSchema.required === true) {
-            this.rules.push(new RuleRequired);
-        }
     }
 
-    protected checkRules(): string[] {
+    checkRules() {
         let defy:string[] = [];
         for (let r of this.rules) r.check(defy, this.value);
         if (defy.length === 0) {
-            this.context.form.removeErrorWidget(this);
-            return undefined;
+            this.context.removeErrorWidget(this);
         }
-        this.context.form.addErrorWidget(this);
-        return defy;
+        else {
+            this.context.addErrorWidget(this);
+            this.errors.push(...defy);
+        }
     }
 
     @computed get isOk() {
-        if (this.rules.length === 0) return true;
-        let defy = this.checkRules;
-        return defy.length === 0;
+        return this.errors.length ===0;
     }
+
+    setError(err:string | string[]) {
+        if (err === undefined) return;
+        if (typeof err === 'string') this.errors.push(err);
+        else this.errors.push(...err);
+    }
+
+    setContextError(err:string | string[]) {
+        if (err === undefined) return;
+        if (typeof err === 'string') this.contextErrors.push(err);
+        else this.contextErrors.push(...err);
+    }
+
+    clearError() {
+        this.errors.splice(0);
+    }
+
+    clearContextError() {
+        this.contextErrors.splice(0);
+    }
+
+    protected parse(value:any):any {return value}
 
     protected setElementValue(value:any) {}
     protected setDataValue(value:any) {
         if (this.isChanging === true) return;
-        this.value = value;
-        this.context.data[this.name] = value;
+        this.context.data[this.name] = this.value = this.parse(value);
     }
 
     setValue(value:any) {
@@ -87,8 +124,10 @@ export abstract class Widget {
 
     getReadOnly():boolean {return this.readOnly}
     getDisabled():boolean {return this.disabled}
+    getVisible():boolean {return this.visible}
     setReadOnly(value:boolean) {this.readOnly = value}
     setDisabled(value:boolean) {this.disabled = value}
+    setVisible(value:boolean) {this.visible = value}
 
     private isChanging: boolean;
     protected onChange = (evt: React.ChangeEvent<any>) => {
@@ -121,5 +160,42 @@ export abstract class Widget {
         return classNames(fieldClass, this.context.form.FieldClass, this.ui && this.ui.className);
     }
 
-    abstract render():JSX.Element;
+    protected abstract render():JSX.Element;
+
+    renderContainer():JSX.Element {
+        if (this.visible === false) return null;
+        let {form, inNode} = this.context;
+        if (inNode === true) return this.render();
+        let label:any;
+        if (this.ui === undefined) {
+            label = this.name;
+        }
+        else {
+            let uiLabel = this.ui.label;
+            if (uiLabel === null) label = null;
+            label = uiLabel || this.name;
+        }
+        if (this.itemSchema.required === true && form.props.requiredFlag !== false) {
+            if (label !== null) label = <>{label}&nbsp;<span className="text-danger">*</span></>;
+        }
+        return form.FieldContainer(label, this.render());
+    }
+
+    protected renderTemplet():JSX.Element | undefined {
+        if (this.children !== undefined) {
+            return <>{this.children}</>;
+        }
+        if (this.ui === undefined) return undefined;
+        let {Templet} = this.ui;
+        if (typeof Templet === 'function') return Templet(this.context, this.name, this.value);
+        return Templet;
+    }
+
+    protected renderErrors() {
+        let errorList:string[] = [...this.errors, ...this.contextErrors];
+        if (errorList.length === 0) return null;
+        return errorList.map(err => <span key={err} className="text-danger inline-block my-1 ml-3">
+            <i className="fa fa-exclamation-circle" /> &nbsp;{err}
+        </span>)
+    }
 }

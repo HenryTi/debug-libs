@@ -14,7 +14,7 @@ export class RangeWidget extends Widget {
     render() {
         let {min, max, step} = this.ui;
         return <><input ref={input=>this.input = input}
-            className={classNames(this.className, 'form-control')}
+            className={classNames(this.className, 'form-control', 'w-min-6c')}
             type={this.inputType}
             defaultValue={this.defaultValue} 
             onChange={this.onChange}

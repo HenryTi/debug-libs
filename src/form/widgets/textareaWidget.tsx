@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { Widget } from './widget';
 import { UiTextAreaItem } from '../uiSchema';
+import { StringSchema } from '../schema';
 
 export class TextAreaWidget extends Widget {
+    protected itemSchema: StringSchema;
     protected input: HTMLTextAreaElement;
     protected ui: UiTextAreaItem;
 
@@ -17,6 +19,7 @@ export class TextAreaWidget extends Widget {
     render() {
         return <textarea ref={(input) => this.input=input} 
             rows={this.ui && this.ui.rows}
+            maxLength={this.itemSchema.maxLength}
             defaultValue={this.defaultValue} onChange={this.onChange} />
     }
 }

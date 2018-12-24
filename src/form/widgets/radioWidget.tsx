@@ -41,7 +41,7 @@ export class RadioWidget extends Widget {
                     if (rowKey !== undefined) name += '-' + rowKey;
                     return <label key={index} className="form-radio-inline">
                         <input ref={input=>this.inputs[index]=input} type="radio" name={name}
-                            value={value} defaultChecked={defaultValue===value} />
+                            value={value} defaultChecked={(this.defaultValue || defaultValue)===value} />
                         {title || value}
                     </label>;
                     //</span>

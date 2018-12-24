@@ -1,29 +1,35 @@
 import * as React from 'react';
-import {observable, computed} from 'mobx';
+import {observable} from 'mobx';
 import classNames from 'classnames';
 import { Schema, ItemSchema, ArrSchema } from './schema';
-import { UiSchema, UiArr, UiItem } from './uiSchema';
+import { UiSchema, TempletType } from './uiSchema';
 import { factory } from './widgets';
 import 'font-awesome/css/font-awesome.min.css';
 import { ContextContainer, FormContext, Context, RowContext } from './context';
-import { Widget } from './widgets/widget';
+import { FormRes, formRes } from './formRes';
+import { resLang } from '../res';
 
-export type FormButtonClick = (name:string, context: Context) => void;
+export type FormButtonClick = (name:string, context: Context) => Promise<any>;
 
 export interface FormProps {
     className?: string;
     schema: Schema;
-    uiSchema: UiSchema;
+    uiSchema?: UiSchema;
     formData?: any;
     onButtonClick?: FormButtonClick;
+    //onSubmit?: FormButtonClick;
     Container?: (content:JSX.Element) => JSX.Element;
-    FieldContainer?: (itemName:string, content:JSX.Element, context:Context) => JSX.Element;
+    FieldContainer?: (label:string|JSX.Element, content:JSX.Element) => JSX.Element;
     FieldClass?: string;
     ArrContainer?: (label:any, content:JSX.Element) => JSX.Element;
     RowContainer?: (content:JSX.Element) => JSX.Element;
-    ArrFieldContainer?: (itemName:string, content:JSX.Element, context:RowContext) => JSX.Element;
+    //ArrFieldContainer?: (itemName:string, content:JSX.Element, context:RowContext) => JSX.Element;
     ButtonClass?: string;
     RowSeperator?: JSX.Element;
+    fieldLabelSize?: 2;                 // col-sm-2 for label
+    requiredFlag?: boolean;             // default=true
+    beforeShow?: (formContext:FormContext) => void;
+    res?: FormRes;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -31,30 +37,33 @@ export class Form extends React.Component<FormProps> {
     readonly itemSchemas: {[name:string]: ItemSchema};
     readonly uiSchema: UiSchema;
     readonly Container: (content:JSX.Element) => JSX.Element;
-    readonly FieldContainer: (label:any, content:JSX.Element, context:Context) => JSX.Element;
+    readonly FieldContainer: (label:any, content:JSX.Element) => JSX.Element;
     readonly FieldClass: string;
     readonly ArrContainer: (label:any, content:JSX.Element) => JSX.Element;
     readonly RowContainer: (content:JSX.Element) => JSX.Element;
-    readonly ArrFieldContainer: (label:any, content:JSX.Element, context:RowContext) => JSX.Element;
+    //readonly ArrFieldContainer: (label:any, content:JSX.Element, context:RowContext) => JSX.Element;
     readonly ButtonClass: string;
     readonly RowSeperator: JSX.Element;
+    readonly res?: FormRes;
+    protected formContext: FormContext;
+    private content: any;
     @observable readonly data:any;
-    @observable errorWidgets:Widget[] = [];
-    @computed get hasError():boolean {return this.errorWidgets.length > 0};
 
     constructor(props:FormProps) {
         super(props);
         let {schema, uiSchema, formData, 
             Container, FieldContainer, FieldClass, 
-            ArrContainer, RowContainer, ArrFieldContainer, 
-            ButtonClass, RowSeperator
+            ArrContainer, RowContainer, //ArrFieldContainer, 
+            ButtonClass, RowSeperator,
+            res,
         } = props;
         this.Container = Container || this.DefaultContainer;
         this.FieldContainer = FieldContainer || this.DefaultFieldContainer;
         this.FieldClass = FieldClass!==undefined && FieldClass!==''&&FieldClass!==null? FieldClass : this.DefaultFieldClass;
         this.ArrContainer = ArrContainer || this.DefaultArrContainer;
         this.RowContainer = RowContainer || this.DefaultRowContainer;
-        this.ArrFieldContainer = ArrFieldContainer || this.DefaultArrFieldContainer;
+        //this.ArrFieldContainer = ArrFieldContainer || this.DefaultArrFieldContainer;
+        this.res = res || this.DefaultRes;
         this.ButtonClass = ButtonClass || this.DefaultButtonClass;
         this.RowSeperator = RowSeperator || this.DefaultRowSeperator;
         this.schema = schema;
@@ -95,16 +104,50 @@ export class Form extends React.Component<FormProps> {
                 this.data[name] = formData[name];
             }
         }
+        let inNode:boolean = this.props.children !== undefined || this.uiSchema && this.uiSchema.Templet !== undefined;
+        //this.formContext = new FormContext(this, inNode);
+        let {children} = this.props;
+        //let content:JSX.Element; //, inNode:boolean;
+        //let formContext: FormContext;
+        if (children !== undefined) {
+            //inNode = true;
+            this.content = <>{children}</>;
+            this.formContext = new FormContext(this, true);
+        }
+        else {
+            let Templet: TempletType;
+            if (this.uiSchema !== undefined) {
+                Templet = this.uiSchema.Templet;
+            }
+            if (Templet !== undefined) {
+                // inNode = true;
+                this.content = typeof(Templet) === 'function'? Templet(this.context) : Templet;
+                this.formContext = new FormContext(this, true);
+            }
+            else {
+                // inNode = false;
+                this.formContext = new FormContext(this, false);
+                this.content = <>{this.schema.map((v, index) => {
+                    return <React.Fragment key={index}>{factory(this.formContext, v, children)}</React.Fragment>
+                })}</>;
+            }
+        }
+    }
+
+    componentDidMount() {
+        let {beforeShow} = this.props;
+        if (beforeShow !== undefined) beforeShow(this.formContext);
     }
 
     render() {
+        /*
         let {children} = this.props;
-        let content:JSX.Element, inNode:boolean;
-        let formContext: FormContext;
+        let content:JSX.Element; //, inNode:boolean;
+        //let formContext: FormContext;
         if (children !== undefined) {
-            inNode = true;
+            //inNode = true;
             content = <>{children}</>;
-            formContext = new FormContext(this, inNode);
+            //this.formContext = formContext = new FormContext(this, inNode);
         }
         else {
             let Templet: React.StatelessComponent|JSX.Element;
@@ -112,30 +155,23 @@ export class Form extends React.Component<FormProps> {
                 Templet = this.uiSchema.Templet;
             }
             if (Templet !== undefined) {
-                inNode = true;
+                // inNode = true;
                 content = typeof(Templet) === 'function'? <Templet /> : Templet;
-                formContext = new FormContext(this, inNode);
+                //this.formContext = formContext = new FormContext(this, inNode);
             }
             else {
-                inNode = false;
-                formContext = new FormContext(this, inNode);
+                // inNode = false;
+                //this.formContext = formContext = new FormContext(this, inNode);
                 content = <>{this.schema.map((v, index) => {
-                    return <React.Fragment key={index}>{factory(formContext, v, children)}</React.Fragment>
+                    return <React.Fragment key={index}>{factory(this.formContext, v, children)}</React.Fragment>
                 })}</>;
             }
-        }
-        return <ContextContainer.Provider value={formContext}>
-            {this.Container(content)}
-        </ContextContainer.Provider>;
-    }
+        }*/
 
-    addErrorWidget(widget:Widget) {
-        let pos = this.errorWidgets.findIndex(v => v === widget);
-        if (pos < 0) this.errorWidgets.push(widget);
-    }
-    removeErrorWidget(widget:Widget) {
-        let pos = this.errorWidgets.findIndex(v => v === widget);
-        if (pos >= 0) this.errorWidgets.splice(pos, 1);
+        return <ContextContainer.Provider value={this.formContext}>
+            <this.formContext.renderErrors />
+            {this.Container(this.content)}
+        </ContextContainer.Provider>;
     }
 
     protected DefaultContainer = (content:JSX.Element): JSX.Element => {
@@ -143,15 +179,27 @@ export class Form extends React.Component<FormProps> {
             {content}
         </form>;
     }
+    /*
     protected DefaultArrFieldContainer = (itemName:string, content:JSX.Element, context:RowContext): JSX.Element => {
         return this.InnerFieldContainer(itemName, content, context);
-    }
-    protected DefaultFieldContainer = (itemName:string, content:JSX.Element, context:Context): JSX.Element => {
-        if (context.isRow === true) {
-            return this.ArrFieldContainer(itemName, content, context as RowContext);
+    }*/
+    protected DefaultFieldContainer = (label:string|JSX.Element, content:JSX.Element): JSX.Element => {
+        //return this.InnerFieldContainer(itemName, content, context);
+        let {fieldLabelSize} = this.props;
+        if (fieldLabelSize > 0) {
+            let labelCol = 'col-sm-' + fieldLabelSize;
+            let fieldCol = 'col-sm-' + (12 - fieldLabelSize);
+            return <div className="form-group row">
+                {label===null? null:<label className={classNames(labelCol, 'col-form-label')}>{label}</label>}
+                <div className={fieldCol}>{content}</div>
+            </div>;
         }
-        return this.InnerFieldContainer(itemName, content, context);
+        return <div className="form-group">
+            {label===null? null:<label className="col-form-label">{label}</label>}
+            {content}
+        </div>;
     }
+    /*
     private InnerFieldContainer = (itemName:string, content:JSX.Element, context:Context): JSX.Element => {
         let itemSchema = context.getItemSchema(itemName);
         let {required} = itemSchema;
@@ -168,6 +216,7 @@ export class Form extends React.Component<FormProps> {
             {content}
         </div>;
     }
+    */
     protected DefaultFieldClass:string = undefined;
     protected DefaultArrContainer = (label:any, content:JSX.Element): JSX.Element => {
         return <div>
@@ -184,4 +233,5 @@ export class Form extends React.Component<FormProps> {
     }
     protected DefaultButtonClass = 'text-center py-2';
     protected DefaultRowSeperator = <div className="border border-gray border-top" />;
+    protected DefaultRes:FormRes = resLang<FormRes>(formRes);
 }

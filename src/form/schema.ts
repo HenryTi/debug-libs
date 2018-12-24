@@ -1,9 +1,13 @@
-export type DataType = 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button' | 'submit';
+export type DataType = 'id' | 'integer' | 'number' | 'string' | 'date' | 'boolean' | 'arr' | 'button' | 'submit';
 
 export interface ItemSchema {
     name: string;
     required?: boolean;
     type: DataType;
+}
+
+export interface IdSchema extends ItemSchema {
+    type: 'id';
 }
 
 export interface NumBaseSchema extends ItemSchema {

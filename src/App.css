@@ -27,8 +27,18 @@
   to { transform: rotate(360deg); }
 }
 .form-row-checkbox {
-  height: 1.1em;
+  margin-left: -10px;
   width: 2em;
+  text-align: left;
+}
+.form-row-checkbox input {
+  height: 1.1em;
+  width: 1.1em;
+}
+.form-row-edit {
+  margin-right: -10px;
+  width: 2em;
+  text-align: right;
 }
 .cursor-pointer {
   cursor: pointer;

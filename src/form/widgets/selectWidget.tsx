@@ -28,7 +28,13 @@ export class SelectWidget extends Widget {
             className={classNames(this.className, 'form-control')}
             defaultValue={this.defaultValue} 
             onChange={this.onChange}>
-            {this.ui.list.map((v,index) => <option key={index} value={v.value}>{v.title || v.value}</option>)}
+            {this.ui.list.map((v,index) => {
+                let {title, value} = v;
+                let cn:string;
+                //if (value === undefined || value === null) cn = 'text-light small';
+                //else cn = 'text-danger';
+                return <option className={cn} key={index} value={value}>{title || value}</option>
+            })}
         </select>
     }
 }
