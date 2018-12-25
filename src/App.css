@@ -26,6 +26,35 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.App-container {
+  background-color: white;
+}
+.container > .tab {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+.tab>div:first-child {
+  display: flex;
+  flex: 1 1 auto;
+}
+.tab>div:last-child {
+  display: flex;
+  align-items: center;
+}
+.tab>div>div {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+}
+.border-gray {
+  border-color: #cccccc !important;
+}
 .form-row-checkbox {
   margin-left: -10px;
   width: 2em;

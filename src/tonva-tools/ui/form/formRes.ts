@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { KeyValueRes, Res } from '../res';
 
 export interface FormRes extends KeyValueRes {

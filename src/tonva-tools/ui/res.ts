@@ -1,4 +1,3 @@
-// this file int tonva-tools
 import _ from 'lodash';
 
 export interface KeyValueRes {
