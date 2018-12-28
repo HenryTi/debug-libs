@@ -1,15 +1,13 @@
 import * as React from 'react';
-import Loadable from 'react-loadable';
 import './App.css';
+import { Page, Tabs, NavView, nav } from 'tonva-tools';
+import { faceTabs } from 'face';
 
-function Loading() {
-  return <div>Loading.. .. ..</div>;
+class App extends React.Component {
+  render() {
+      let page = <Page header={false}><Tabs tabs={faceTabs} /></Page>;
+      return <NavView onLogined={async () => nav.push(page)} />;
+  }
 }
 
-const LoadableComponent = Loadable({
-  loader: () => import('./testTabs'),
-  loading: Loading,
-});
-
-export default LoadableComponent;
-
+export default App;

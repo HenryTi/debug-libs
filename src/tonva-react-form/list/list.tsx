@@ -77,8 +77,12 @@ export class List extends React.Component<ListProps> {
         else if (items.length === 0)
             content = staticRow(none, 'none');
         else {
+            let {key} = this.props.item;
             content = items.map((item, index) => {
-                return this.listBase.render(item, index);
+                let kv = key===undefined?index:key(item);
+                return <React.Fragment key={kv}>
+                    {this.listBase.render(item, index)}
+                </React.Fragment>;
             });
         }
         return <ul className={classNames('va-list', className)}>

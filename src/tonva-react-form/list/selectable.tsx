@@ -104,7 +104,7 @@ export class Selectable extends ListBase {
     render(item:SelectableItem, index:number):JSX.Element {
         let {className, key, render, onSelect} = this.list.props.item;
         let {labelId, selected} = item;
-        return <li key={key===undefined?index:key(item)} className={classNames(className)}>
+        return <li className={classNames(className)}>
             <div className="d-flex align-items-center px-3">
                 <input ref={input=>{
                         if (!input) return;

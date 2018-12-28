@@ -22,7 +22,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     //"importHelpers": true,
-},
+  },
   "exclude": [
     "node_modules",
     "build",
