@@ -154,8 +154,7 @@ export class Page extends React.Component<PageProps, PageState> {
     }
 
     private onTouchStart(evt: React.TouchEvent<HTMLElement>) {
-        evt.preventDefault();
-        evt.stopPropagation();
+        alert('Touch Start')
     }
 
     private renderTabs(footer: JSX.Element) {
