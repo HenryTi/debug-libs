@@ -103,8 +103,13 @@ export class CApp extends Controller {
     protected get VAppMain():TypeVPage<CApp> {return (this.ui&&this.ui.main) || VAppMain}
 
     protected async beforeStart():Promise<boolean> {
+        console.log('if (await super.beforeStart() === false) return false;');
         if (await super.beforeStart() === false) return false;
+        return await this.loadUnits();
+    }
 
+    protected async loadUnits() {
+        console.log('loadUnits');
         try {
             let hash = document.location.hash;
             if (hash.startsWith('#tvdebug')) {
@@ -168,8 +173,17 @@ export class CApp extends Controller {
         }
         await this.showMainPage();
     }
+
+    private loaded: boolean;
     async load() {
-        await this.beforeStart();
+        if (this.loaded === true) return;
+        //console.log('await this.beforeStart();');
+        //await this.beforeStart();
+        //if (await this.beforeStart() === false) return false;
+        this.registerReceiveHandler();
+        let ret = await this.loadUnits();
+        this.loaded = true;
+        return ret;
     }
 
     render(): JSX.Element {

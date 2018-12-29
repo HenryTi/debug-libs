@@ -15,8 +15,10 @@ export class TabController {
     @observable private items:any[];
 
     async start() {
+        console.log('start()');
         this.cApp = new CApp(tonvaApp);
         await this.cApp.load();
+        console.log('await this.cApp.load();');
         this.cUsq = this.cApp.getCUsq('JKDev/jkOrder');
         this.tuidProduct = this.cUsq.tuid('product');
         let ret = await this.tuidProduct.search('', 0, 100);

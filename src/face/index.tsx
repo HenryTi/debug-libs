@@ -6,6 +6,9 @@ import {memberTab} from './member';
 import {cartTab} from './cart';
 import {meTab} from './me';
 
+//export const cApp = new CApp(tonvaApp);
+
+
 const color = (selected:boolean) => selected===true? 'text-primary' : 'text-muted';
 export const faceTabs = [
     {name: 'home', label: '首页', icon: 'home', content: homeTab, notify: store.homeCount},
