@@ -109,7 +109,6 @@ export class CApp extends Controller {
     }
 
     protected async loadUnits() {
-        let date = new Date().getTime();
         try {
             let hash = document.location.hash;
             if (hash.startsWith('#tvdebug')) {
@@ -121,11 +120,11 @@ export class CApp extends Controller {
             let {unit} = meInFrame;
             if (this.isProduction === false && (unit===undefined || unit<=0)) {
                 let app = await loadAppUsqs(this.appOwner, this.appName);
-                nav.logs.push('after loadAppUsqs: ' + (new Date().getTime() - date));
+                nav.logStep('after loadAppUsqs');
                 let {id} = app;
                 this.id = id;
                 await this.loadAppUnits();
-                nav.logs.push('after loadAppUnits: ' + (new Date().getTime() - date));
+                nav.logStep('after loadAppUnits');
                 switch (this.appUnits.length) {
                     case 0:
                         this.showUnsupport();
