@@ -14,20 +14,8 @@ class Me extends React.Component {
             nav.logout();
         }
     }
-    private about = () => {
-        let right = <button className='btn btn-success btn-sm' onClick={this.showLogs}>log</button>;
-        nav.push(<Page header="关于同花" right={right}>
-            <About />
-        </Page>);
-    }
     
-    private showLogs() {
-        nav.push(<Page header="Logs">
-            {nav.logs.map((v,i) => {
-                return <div key={i} className="px-3 py-1">{v}</div>;
-            })}
-        </Page>);
-    }
+    private about = () => nav.push(<About />);
     
     private changePassword = () => {
         nav.push(<ChangePasswordPage />);
