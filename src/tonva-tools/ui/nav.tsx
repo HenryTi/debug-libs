@@ -28,6 +28,7 @@ export const mobileHeaderStyle = isMobile? {
 } : undefined;
 
 const logo = require('../img/logo.svg');
+let logMark: number;
 const logs:string[] = [];
 
 export interface Props //extends React.Props<Nav>
@@ -586,6 +587,14 @@ export class Nav {
     get logs() {return logs};
     log(msg:string) {
         logs.push(msg);
-    } 
+    }
+    logMark() {
+        let date = new Date();
+        logMark = date.getTime();
+        logs.push('log-mark: ' + date.toTimeString());
+    }
+    logStep(step:string) {
+        logs.push(step + ': ' + (new Date().getTime() - logMark));
+    }
 }
 export const nav: Nav = new Nav();

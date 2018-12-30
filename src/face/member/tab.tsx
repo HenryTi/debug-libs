@@ -3,7 +3,7 @@ import { CApp, CUsq, TuidMain } from 'tonva-react-usql';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { List } from 'tonva-react-form';
-import { Loading } from 'tonva-tools';
+import { Loading, nav } from 'tonva-tools';
 
 const tonvaApp = 'JKDev/jkOrder';
 
@@ -15,13 +15,14 @@ export class TabController {
     @observable private items:any[];
 
     async start() {
-        console.log('start()');
+        nav.logMark();
         this.cApp = new CApp(tonvaApp);
         await this.cApp.load();
-        console.log('await this.cApp.load();');
+        nav.logStep('await this.cApp.load()');
         this.cUsq = this.cApp.getCUsq('JKDev/jkOrder');
         this.tuidProduct = this.cUsq.tuid('product');
         let ret = await this.tuidProduct.search('', 0, 100);
+        nav.logStep('let ret = await this.tuidProduct.search(-, 0, 100)');
         this.items = ret;
     }
 
