@@ -29,6 +29,7 @@ export class Data<T> implements ClearableData {
 export class LocalData {
     user = new Data<User>('user');
     guest = new Data<Guest>('guest');
+    unit = new Data<number>('unit');
     homeTabCur = new Data<number>('homeTabCur');
 
     logoutClear() {

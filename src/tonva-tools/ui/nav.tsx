@@ -7,8 +7,8 @@ import {netToken} from '../net/netToken';
 import FetchErrorView from './fetchErrorView';
 import {FetchError} from '../fetchError';
 import {appUrl, setMeInFrame, isBridged, logoutUsqTokens} from '../net/appBridge';
-import {LocalData} from '../local';
-import {guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, getCenterUrl, centerDebugHost} from '../net';
+import {LocalData, isDevelopment} from '../local';
+import {guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, getCenterUrl, centerDebugHost, CenterApi} from '../net';
 import 'font-awesome/css/font-awesome.min.css';
 import '../css/va-form.css';
 import '../css/va.css';
@@ -419,6 +419,25 @@ export class Nav {
         await this.ws.receive(msg);
     }
 
+    private async loadUnit() {
+        async function getUnitFromCenter() {
+            let unitRes = await fetch('unit.json', {});
+            let a = await unitRes.json();
+            let unitName = a.unit;
+            if (unitName === undefined) return;
+            return guestApi.unitFromName(unitName);
+        }
+        if (isDevelopment === true) {
+
+        }
+        else {
+            let unit = this.local.unit.get();
+            if (unit === undefined) {
+
+            }
+        }
+    }
+
     private isInFrame:boolean;
     async start() {
         nav.push(<Page header={false}><Loading /></Page>);
@@ -427,6 +446,7 @@ export class Nav {
         setCenterUrl(url);
         this.wsHost = ws;
         
+
         let guest:Guest = this.local.guest.get();
         if (guest === undefined) {
             guest = await guestApi.guest();

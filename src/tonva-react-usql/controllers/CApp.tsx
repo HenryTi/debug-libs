@@ -176,13 +176,6 @@ export class CApp extends Controller {
     private loaded: boolean;
     async load() {
         if (this.loaded === true) return;
-
-        let unitRes = await fetch('unit.json', {});
-        let a = await unitRes.json();
-
-        //console.log('await this.beforeStart();');
-        //await this.beforeStart();
-        //if (await this.beforeStart() === false) return false;
         this.registerReceiveHandler();
         let ret = await this.loadUnits();
         this.loaded = true;
