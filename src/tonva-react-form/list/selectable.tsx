@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {observable, computed, IObservableArray} from 'mobx';
-import * as classNames from 'classnames';
+import {computed, IObservableArray} from 'mobx';
+import classNames from 'classnames';
+import { PageItems, uid } from 'tonva-tools';
 import {ListBase} from './base';
-import {uid} from '../uid';
-import { PageItems } from 'tonva-tools';
 
 export interface SelectableItem {
     selected: boolean;

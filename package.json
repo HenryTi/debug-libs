@@ -5,6 +5,7 @@
   "homepage": ".",
   "dependencies": {
     "@types/classnames": "^2.2.6",
+    "@types/jwt-decode": "^2.2.1",
     "@types/lodash": "^4.14.119",
     "@types/react-loadable": "^5.4.2",
     "bootstrap": "^4.1.3",

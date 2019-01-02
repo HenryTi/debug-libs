@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
 import {ListBase} from './base';
-import { uid } from '../uid';
 
 export class Static extends ListBase {
     render(item:any, index:number):JSX.Element {

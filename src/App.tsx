@@ -6,7 +6,9 @@ import { faceTabs } from 'face';
 class App extends React.Component {
   render() {
       let page = <Page header={false}><Tabs tabs={faceTabs} /></Page>;
-      return <NavView onLogined={async () => nav.push(page)} />;
+      return <NavView 
+        onLogined={async () => nav.push(page)}
+        notLogined={async () => nav.push(page)} />;
   }
 }
 

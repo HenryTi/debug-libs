@@ -22,18 +22,7 @@ class Me extends React.Component {
     }
     render() {
         const {user} = nav;
-        let rows:Prop[] = [
-            '',
-            {
-                type: 'component', 
-                component: <Media icon={consts.appIcon} main={user.name} discription={String(user.id)} />
-            },
-            '',
-            {
-                type: 'component', 
-                component: <IconText iconClass="text-info" icon="envelope" text="修改密码" />,
-                onClick: this.changePassword
-            },
+        let aboutRows:Prop[] = [
             '',
             {
                 type: 'component', 
@@ -50,6 +39,26 @@ class Me extends React.Component {
                 </button>
             },
         ];
+        let rows:Prop[];
+        if (user === undefined) {
+            rows = aboutRows;
+        }
+        else {
+            rows = [
+                '',
+                {
+                    type: 'component', 
+                    component: <Media icon={consts.appIcon} main={user.name} discription={String(user.id)} />
+                },
+                '',
+                {
+                    type: 'component', 
+                    component: <IconText iconClass="text-info" icon="envelope" text="修改密码" />,
+                    onClick: this.changePassword
+                },
+            ]    
+            rows.push(...aboutRows);
+        }
         return <PropGrid rows={rows} values={{}} />;
     }
 }
