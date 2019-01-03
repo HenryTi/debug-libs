@@ -41,12 +41,11 @@ export class CApp extends Controller {
         let appName = this.appOwner + '/' + this.appName;
         let cApp = new CApp(appName, {usqs:{}} );
         let keepNavBackButton = true;
-        await cApp.start(keepNavBackButton);    
+        await cApp.start(keepNavBackButton);
     }
 
     protected async loadUsqs(): Promise<string[]> {
         let retErrors:string[] = [];
-        let unit = meInFrame.unit;
         let app = await loadAppUsqs(this.appOwner, this.appName);
         let {id, usqs} = app;
         this.id = id;

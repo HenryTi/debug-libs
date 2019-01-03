@@ -30,6 +30,9 @@ class Me extends React.Component {
                 onClick: this.about
             },
             '',
+        ];
+
+        let logOutRows:Prop[] = [
             '',
             {
                 type: 'component', 
@@ -42,6 +45,15 @@ class Me extends React.Component {
         let rows:Prop[];
         if (user === undefined) {
             rows = aboutRows;
+            rows.push('');
+            rows.push(
+                {
+                    type: 'component', 
+                    component: <button className="btn btn-success w-100" onClick={() => nav.showLogin(true)}>
+                        <FA name="sign-out" size="lg" /> 请登录
+                    </button>
+                },
+            );
         }
         else {
             rows = [
@@ -57,7 +69,7 @@ class Me extends React.Component {
                     onClick: this.changePassword
                 },
             ]    
-            rows.push(...aboutRows);
+            rows.push(...aboutRows, ...logOutRows);
         }
         return <PropGrid rows={rows} values={{}} />;
     }
