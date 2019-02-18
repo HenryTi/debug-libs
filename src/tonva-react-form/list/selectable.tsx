@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {computed, IObservableArray} from 'mobx';
-import classNames from 'classnames';
-import { PageItems, uid } from 'tonva-tools';
+import {observable, computed, IObservableArray} from 'mobx';
+import * as classNames from 'classnames';
 import {ListBase} from './base';
+import {uid} from '../uid';
+import { PageItems } from 'tonva-tools';
 
 export interface SelectableItem {
     selected: boolean;
@@ -103,7 +104,7 @@ export class Selectable extends ListBase {
     render(item:SelectableItem, index:number):JSX.Element {
         let {className, key, render, onSelect} = this.list.props.item;
         let {labelId, selected} = item;
-        return <li className={classNames(className)}>
+        return <li key={key===undefined?index:key(item)} className={classNames(className)}>
             <div className="d-flex align-items-center px-3">
                 <input ref={input=>{
                         if (!input) return;

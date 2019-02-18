@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { observable } from 'mobx';
-import { Form, Field, UiSchema, Schema, Context, ArrSchema, UiArr, IntSchema, StringSchema, UiTextAreaItem, UiIdItem, ButtonSchema, UiTextItem, NumSchema } from 'tonva-tools';
+import { Form, Field, UiSchema, Schema, Context, ArrSchema, UiArr, IntSchema, StringSchema, UiTextAreaItem, UiIdItem, ButtonSchema, UiTextItem, NumSchema, UiCustom, nav } from 'tonva-tools';
 import logo from './logo.svg';
+import { MinusPlusWidget } from './minusPlusWidget';
+import RegSuccess from 'tonva-tools/entry/regSuccess';
 
 const schema: Schema = [
   {name: 'id', type: 'id', required: true},
@@ -20,6 +22,14 @@ const schema: Schema = [
       {name: 'n1', type: 'integer'},
       {name: 'n2', type: 'integer'},
       {name: 'n3', type: 'integer'},
+      {
+        name: 'subArr',
+        type: 'arr',
+        arr: [
+          {name: 'sa1', type: 'string'},
+          {name: 'sa2', type: 'integer'}
+        ]
+      }
       //{name: 'add', type: 'button'}
     ]
   } as ArrSchema,
@@ -31,7 +41,15 @@ const formData = {
   number: 2, integer: 3,
   text: '???',
   arr1: [
-    {$a:1, 'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0', n1:1},
+    {
+      $a:1, 'arr1-b': 'arb--dddd0', 'arr1-c': 'arr1-c-cc-cc0', 
+      n1:1,
+      subArr: [
+        {sa1: 'text1', sa2: 1},
+        {sa1: 'text2', sa2: 2},
+        {sa1: 'text3', sa2: 3},
+      ]
+    },
     {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'arr1-c-cc-cc1', n1:2},
     {$a:1, 'arr1-b': 'arb--dddd1', 'arr1-c': 'asd fsd farr1-c-cc-cc1', n1:3},
   ]
@@ -54,12 +72,12 @@ export class MyApp extends React.Component {
     }
     else {
       msg = `button ${context.arrName}.${name} clicked!
-row data: ${JSON.stringify(context.data, replacer)}
+row data: ${JSON.stringify(context.initData, replacer)}
 form data: ${JSON.stringify(context.form.data, replacer)}
 `;
     }
     alert(msg);
-    return 'submit error';
+    return 'submit error -- hi define';
   }
 
   private onBChange = (row:any)=>{
@@ -104,7 +122,13 @@ form data: ${JSON.stringify(context.form.data, replacer)}
       id: {widget: 'id', pickId: async (context:Context, name:string, value:number)=>{alert('输入2');return 2;}} as UiIdItem,
       text: {widget: 'textarea', rows: 7} as UiTextAreaItem,
       a: {widget: 'text'},
+      number: {
+        widget: 'custom',
+        className: 'mx-1 text-center',
+        WidgetClass: MinusPlusWidget,
+      } as UiCustom,
       integer: {
+        className: 'mx-1',
         rules: (value:any) => {if (value === 19) return '不能为19';else return undefined}, 
         //Templet:(context:Context, name:string, value:any)=><>{name}: {value}</>
       },
@@ -117,14 +141,23 @@ form data: ${JSON.stringify(context.form.data, replacer)}
           "arr1-c": {className: "w-max-6c" },          
           n1: {widget:'radio', className:'flex-grow-1', defaultValue:2, list:[{value:1, title:'小提琴'}, {value:2, title:'钢琴'}, {value:3, title:'单簧管'}]},
           n2: {widget:'select', list:[{value:null, title:' - '},{value:1, title:'数字1'}, {value:2}]},
-          n3: {widget:'range'}
+          n3: {widget:'range'},
+          subArr: {
+            widget: 'arr',
+            Templet: <>TTT<Field name="sa1"/> 'text1', <Field name="sa2" /> : 1, ddd </>,
+            items: {
+
+            }
+          } as UiArr
         }
       } as UiArr
     },
     Templet: () => <>
       <div className="form-inline">
         <Field name="id" />
-        af sasdf as fd<b>dasdf asdf sad</b><Field name="number"/> &nbsp;
+        af sasdf as fd<b>dasdf asdf sad</b>
+        <Field name="number"/>
+        &nbsp;
         <Field name="integer" />&nbsp; <i>adsfas dfasdf asd fas fda</i>
         <div className="font-weight-bold text-success h3">
           nnn<Field name="date"/>
@@ -152,7 +185,14 @@ form data: ${JSON.stringify(context.form.data, replacer)}
         items: {
           n1: {widget:'radio', list:[{title:' - '},{value:1, title:'数字1'}, {value:2}]},
           n2: {widget:'select', list:[{value:null, title:' - '},{value:1, title:'数字1'}, {value:2}]},
-          n3: {widget:'range'}
+          n3: {widget:'range'},
+          subArr: {
+            widget: 'arr',
+            Templet: <>TTT<Field name="sa1"/> 'text1', <Field name="sa2" /> : 1, ddd </>,
+            items: {
+
+            }
+          } as UiArr
         }
       } as UiArr
     },
@@ -174,6 +214,20 @@ form data: ${JSON.stringify(context.form.data, replacer)}
     }
   }
 
+  private fetchClick = async () => {
+    let a = await fetch('http://localhost:50976/api/Center/CreateSession', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({rsaKey: null})
+    });
+  }
+
+  private regSuccess = () => {
+    nav.push(<RegSuccess user="aa" pwd="bb" />);
+  }
+
   public render() {
     return (
       <div className="App">
@@ -181,16 +235,23 @@ form data: ${JSON.stringify(context.form.data, replacer)}
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
+
+        <Form className="mb-3" 
+schema={schema} uiSchema={this.uiSchema} formData={formData} 
+onButtonClick={this.onFormButtonClick}
+beforeShow={context => {
+  //context.setDisabled('integer', true)
+}} />
+
+<Form
+schema={this.schema3} uiSchema={this.uiSchema3}
+/>
         <p className="App-intro">
           To get started, edit <code>src/App.tsx</code> and save to reload.
+          <button onClick={this.fetchClick}>fetch</button>
+          <button onClick={this.regSuccess}>fetch</button>
         </p>
         <div className="App-container container text-left">
-          <Form className="mb-3" 
-            schema={schema} uiSchema={this.uiSchema} formData={formData} 
-            onButtonClick={this.onFormButtonClick}
-            beforeShow={context => {
-              //context.setDisabled('integer', true)
-            }} />
           <Form className="mb-3" 
             schema={schema} uiSchema={this.uiSchema1} formData={formData} 
             onButtonClick={this.onFormButtonClick}
@@ -200,14 +261,12 @@ form data: ${JSON.stringify(context.form.data, replacer)}
             }} 
             />
 
-          <Form
-            schema={this.schema3} uiSchema={this.uiSchema3}
-          />
-
         </div>
       </div>
     );
   }
 }
+
+
 
 export default MyApp;

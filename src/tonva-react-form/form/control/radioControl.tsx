@@ -24,7 +24,7 @@ export class RadioControl extends Control {
                         <input type='radio'
                             name={this.field.name} 
                             className="custom-control-input" />
-                        <span className="custom-control-indicator" />
+                        <span className="custom-control-indicator"></span>
                         <span className="custom-control-description">{t}</span>
                     </label>;
                 })

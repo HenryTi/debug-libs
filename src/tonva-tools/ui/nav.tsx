@@ -1,14 +1,13 @@
 import * as React from 'react';
 import {observable} from 'mobx';
-import {fetchLocalCheck} from '../net/fetchLocalCheck';
-import {User, decodeUserToken, Guest} from '../user';
+import {User, Guest, UserInNav} from '../user';
 import {Page} from './page';
 import {netToken} from '../net/netToken';
 import FetchErrorView from './fetchErrorView';
 import {FetchError} from '../fetchError';
-import {appUrl, setMeInFrame, isBridged, logoutUsqTokens} from '../net/appBridge';
-import {LocalData, isDevelopment} from '../local';
-import {guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, getCenterUrl, centerDebugHost, CenterApi, meInFrame} from '../net';
+import {appUrl, setMeInFrame, logoutUqTokens} from '../net/appBridge';
+import {LocalData} from '../local';
+import {guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, meInFrame, isDevelopment, host} from '../net';
 import 'font-awesome/css/font-awesome.min.css';
 import '../css/va-form.css';
 import '../css/va.css';
@@ -336,51 +335,12 @@ export class NavView extends React.Component<Props, State> {
     }
 }
 
-interface UrlAndWs {
-    url: string;
-    ws: string;
-}
-
-function centerUrlAndWs(centerHost:string):UrlAndWs {
-    //let host = 'REACT_APP_CENTER_HOST';
-    //let centerHost = process.env[host];
-    if (centerHost === undefined) return {url:undefined, ws:undefined};
-    return {
-        url: 'http://' + centerHost + '/',
-        ws: 'ws://' + centerHost + '/tv/',
-    }
-}
-
-async function loadCenterUrl():Promise<{url:string, ws:string}> {
-    let urlAndWs:UrlAndWs = centerUrlAndWs(process.env['REACT_APP_CENTER_HOST']);
-    let debugUrlAndWs:UrlAndWs = centerUrlAndWs(process.env.REACT_APP_CENTER_DEBUG_HOST || centerDebugHost);
-    let hash = document.location.hash;
-    if (hash.includes('sheet_debug') === true) {
-        return debugUrlAndWs;
-    }
-    if (process.env.NODE_ENV==='development') {
-        if (debugUrlAndWs.url !== undefined) {
-            try {
-                console.log('try connect debug url');
-                //let ret = await fetch(debugUrlAndWs.url);
-                let ret = await fetchLocalCheck(debugUrlAndWs.url);
-                console.log('connected');
-                return debugUrlAndWs;
-            }
-            catch (err) {
-                //console.error(err);
-            }
-        }
-    }
-    return urlAndWs;
-}
-
 export class Nav {
     private nav:NavView;
     private ws: WsBase;
     private wsHost: string;
     private local: LocalData = new LocalData();
-    @observable user: User = undefined; // = {id:undefined, name:undefined, token:undefined};
+    @observable user: UserInNav = undefined;
     language: string;
     culture: string;
 
@@ -419,22 +379,30 @@ export class Nav {
         await this.ws.receive(msg);
     }
 
-    private async loadUnit() {
-        async function getUnitName() {
+    private async getUnitName() {
+        try {
             let unitRes = await fetch('unit.json', {});
-            let a = await unitRes.json();
-            return a.unit;
+            //if (unitRes)
+            let res = await unitRes.json();
+            return res.unit;
         }
+        catch (err) {
+            this.local.unit.clear();
+            return;
+        }
+    }
+
+    private async loadUnit() {
         let unitName:string;
         let unit = this.local.unit.get();
         if (unit !== undefined) {
             if (isDevelopment !== true) return unit.id;
-            unitName = await getUnitName();
+            unitName = await this.getUnitName();
             if (unitName === undefined) return;
             if (unit.name === unitName) return unit.id;
         }
         else {
-            unitName = await getUnitName();
+            unitName = await this.getUnitName();
             if (unitName === undefined) return;
         }
         let unitId = await guestApi.unitFromName(unitName);
@@ -445,12 +413,15 @@ export class Nav {
     }
 
     private isInFrame:boolean;
+    private centerHost: string;
     async start() {
+        nav.clear();
         nav.push(<Page header={false}><Loading /></Page>);
-
-        let {url, ws} = await loadCenterUrl();
-        setCenterUrl(url);
+        await host.start();
+        let {url, ws} = host;
+        this.centerHost = url;
         this.wsHost = ws;
+        setCenterUrl(url);
         
         let unit = await this.loadUnit();
         meInFrame.unit = unit;
@@ -479,16 +450,9 @@ export class Nav {
                 return;
             }
         }
-        //let device: string = this.local.device.get();
+
         let user: User = this.local.user.get();
-        /*
-        if (device === undefined) {
-            device = uid();
-            this.local.device.set(device);
-            user = undefined;
-        }
-        */
-        if (user === undefined/* || user.guest !== device*/) {
+        if (user === undefined) {
             let {notLogined} = this.nav.props;
             if (notLogined !== undefined) {
                 await notLogined();
@@ -515,7 +479,7 @@ export class Nav {
 
     setGuest(guest: Guest) {
         this.local.guest.set(guest);
-        netToken.set(guest.token);
+        netToken.set(0, guest.token);
     }
 
     async logined(user: User) {
@@ -524,9 +488,8 @@ export class Nav {
 
         console.log("logined: %s", JSON.stringify(user));
         this.local.user.set(user);
-        netToken.set(user.token);
-        this.user = user;
-        console.log('ws.connect() in app main frame');
+        netToken.set(user.id, user.token);
+        this.user = new UserInNav(user);
         await this.showAppView();
     }
 
@@ -548,9 +511,9 @@ export class Nav {
         this.local.logoutClear();
         this.user = undefined; //{} as User;
         logoutApis();
-        logoutUsqTokens();
+        logoutUqTokens();
         let guest = this.local.guest.get();
-        setCenterToken(guest && guest.token);
+        setCenterToken(0, guest && guest.token);
         this.ws = undefined;
         if (notShowLogin === true) return;
         //await this.showLogin();
@@ -602,19 +565,23 @@ export class Nav {
     confirmBox(message?:string): boolean {
         return this.nav.confirmBox(message);
     }
-    navToApp(url: string, unitId: number, apiId?:number, sheetType?:number, sheetId?:number) {
-        let centerUrl = getCenterUrl();
-        let sheet = centerUrl.includes('http://localhost:') === true? 'sheet_debug':'sheet'
-        let uh = sheetId === undefined?
-                appUrl(url, unitId) :
-                appUrl(url, unitId, sheet, [apiId, sheetType, sheetId]);
-        console.log('navToApp: %s', JSON.stringify(uh));
-        nav.push(<article className='app-container'>
-            <span id={uh.hash} onClick={()=>this.back()} style={mobileHeaderStyle}>
-                <i className="fa fa-arrow-left" />
-            </span>
-            <iframe src={uh.url} />
-        </article>);
+    async navToApp(url: string, unitId: number, apiId?:number, sheetType?:number, sheetId?:number):Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            let sheet = this.centerHost.includes('http://localhost:') === true? 'sheet_debug':'sheet'
+            let uh = sheetId === undefined?
+                    appUrl(url, unitId) :
+                    appUrl(url, unitId, sheet, [apiId, sheetType, sheetId]);
+            console.log('navToApp: %s', JSON.stringify(uh));
+            nav.push(<article className='app-container'>
+                <span id={uh.hash} onClick={()=>this.back()} style={mobileHeaderStyle}>
+                    <i className="fa fa-arrow-left" />
+                </span>
+                <iframe src={uh.url} />
+            </article>, 
+            ()=> {
+                resolve();
+            });
+        });
     }
 
     navToSite(url: string) {

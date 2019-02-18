@@ -1,9 +1,9 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {isDevelopment} from '../local';
 import {User} from '../user';
 import {nav} from './nav';
 import {Page} from './page';
+import { isDevelopment } from '../net';
 
 export abstract class Controller {
     readonly res: any;
@@ -34,8 +34,8 @@ export abstract class Controller {
     protected onDispose() {
     }
 
-    protected async showVPage(vp: new (coordinator: Controller)=>VPage<Controller>, param?:any):Promise<void> {
-        await (new vp(this)).showEntry(param);
+    protected async openVPage(vp: new (coordinator: Controller)=>VPage<Controller>, param?:any):Promise<void> {
+        await (new vp(this)).open(param);
     }
 
     protected renderView(view: new (coordinator: Controller)=>View<Controller>, param?:any) {
@@ -67,13 +67,13 @@ export abstract class Controller {
     private onMessageReceive = async (message:any):Promise<void> => {
         await this.onMessage(message);
     }
+
     protected async beforeStart():Promise<boolean> {
         /*
         console.log('this.receiveHandlerId = nav.registerReceiveHandler(this.onMessageReceive);');
         this.receiveHandlerId = nav.registerReceiveHandler(this.onMessageReceive);
         console.log('return true');
         */
-        this.registerReceiveHandler();
         return true;
     }
     protected registerReceiveHandler() {
@@ -83,6 +83,7 @@ export abstract class Controller {
     protected abstract internalStart(param?:any):Promise<void>;
     async start(param?:any):Promise<void> {
         this.disposer = this.dispose.bind(this);
+        this.registerReceiveHandler();
         let ret = await this.beforeStart();
         if (ret === false) return;
         await this.internalStart(param);
@@ -103,7 +104,7 @@ export abstract class Controller {
         if (this._resolve_$ === undefined) this._resolve_$ = [];
         return new Promise<any> (async (resolve, reject) => {
             this._resolve_$.push(resolve);
-            await (new vp(this)).showEntry(param);
+            await (new vp(this)).open(param);
         });
     }
 
@@ -168,8 +169,8 @@ export abstract class View<C extends Controller> {
         return (new vm(this.controller)).render(param);
     }
 
-    protected async showVPage(vp: new (coordinator: Controller)=>VPage<Controller>, param?:any):Promise<void> {
-        await (new vp(this.controller)).showEntry(param);
+    protected async openVPage(vp: new (coordinator: Controller)=>VPage<Controller>, param?:any):Promise<void> {
+        await (new vp(this.controller)).open(param);
     }
 
     protected async event(type:string, value?:any) {
@@ -227,7 +228,7 @@ export abstract class VPage<C extends Controller> extends View<C> {
         super(coordinator);
     }
 
-    abstract showEntry(param?:any):Promise<void>;
+    abstract open(param?:any):Promise<void>;
 
     render(param?:any):JSX.Element {return null;}
 }

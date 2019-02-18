@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {List} from './list';
 import { IObservableArray, computed } from 'mobx';
 import { PageItems } from 'tonva-tools';
+import {List} from './index';
 
 export abstract class ListBase {
     protected list: List;

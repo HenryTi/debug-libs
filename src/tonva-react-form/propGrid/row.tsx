@@ -138,10 +138,12 @@ export class ListPropRow extends LabeledPropRow {
         if (items === undefined) return <div/>;
         // new row(item)
         return <div className="w-100">
-            {items.map((item, index) => <React.Fragment key={index}>
-                {index===0? null: <div style={{width:'100%', borderBottom:'1px solid #f0f0f0'}} />}
-                {React.createElement(row, item)}
-            </React.Fragment>)}
+            {
+                items.map((item, index) => <React.Fragment key={index}>
+                    {index===0? null: <div style={{width:'100%', borderBottom:'1px solid #f0f0f0'}} />}
+                    {React.createElement(row, item)}
+                </React.Fragment>)
+            }
         </div>;
     }
 }

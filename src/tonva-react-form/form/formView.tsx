@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {FormEvent} from 'react';
 import {computed} from 'mobx';
-import { uid } from 'tonva-tools';
+import {uid} from '../uid';
 import {Rule} from './rule';
 import {Field} from './field';
 import {Face} from './face';

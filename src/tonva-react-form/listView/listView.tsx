@@ -53,7 +53,7 @@ export class ListView extends React.Component<ListViewProps, null> {
                     }
                 }
                 if (listItem.key === undefined) listItem.key = listItem.main;
-                return <ListRow key={index} onClick={onClick} {...listItem} />;
+                return <ListRow onClick={onClick} {...listItem} />;
             });
         }
         if (header !== undefined) {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Page, nav, Form, Context, Schema, UiSchema, UiPasswordItem} from 'tonva-tools';
-import center from 'face/center';
+import center from './center';
 
 const schema: Schema = [
     {name:'orgPassword', type: 'string', required: true},
