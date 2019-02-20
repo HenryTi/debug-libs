@@ -2,9 +2,9 @@ import * as React from 'react';
 import {observable} from 'mobx';
 import {observer} from 'mobx-react';
 import './App.css';
-import { Page, Tabs, NavView, nav, ApiBase, host } from 'tonva-tools';
+import { Page, Tabs, NavView, nav, Image, ResUploader } from 'tonva-tools';
 import { faceTabs } from 'face';
-import { Image, ResUploader } from 'tonva-react-form';
+
 /*
 @observer
 class ResUploader extends React.Component {
@@ -66,7 +66,7 @@ class Uploader extends React.Component {
     render() {
         //return <form encType="multipart/form-data" onSubmit={this.onSubmit}>
         return <div>
-            <ResUploader ref={v=>this.resUploader=v} url="http://localhost:3015/res/upload" />
+            <ResUploader ref={v=>this.resUploader=v} />
             <input type='button' name='submit' value='upload' onClick={this.upload} />
             <br/>
             <Image src={this.resId} />
