@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 import * as React from 'react';
 //import {Media, PropGrid, Prop, FA, IconText, TonvaForm, FormRow, SubmitResult, Fields} from 'tonva-react-form';
 import { nav } from 'tonva-tools';
@@ -7,22 +20,24 @@ import consts from 'consts';
 //import mainApi from 'mainApi';
 import { About } from './about';
 import ChangePasswordPage from './changePassword';
-class Me extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.about = () => nav.push(React.createElement(About, null));
-        this.changePassword = () => {
+var Me = /** @class */ (function (_super) {
+    __extends(Me, _super);
+    function Me() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.about = function () { return nav.push(React.createElement(About, null)); };
+        _this.changePassword = function () {
             nav.push(React.createElement(ChangePasswordPage, null));
         };
+        return _this;
     }
-    exit() {
+    Me.prototype.exit = function () {
         if (confirm('退出当前账号不会删除任何历史数据，下次登录依然可以使用本账号')) {
             nav.logout();
         }
-    }
-    render() {
-        const { user } = nav;
-        let aboutRows = [
+    };
+    Me.prototype.render = function () {
+        var user = nav.user;
+        var aboutRows = [
             '',
             {
                 type: 'component',
@@ -31,7 +46,7 @@ class Me extends React.Component {
             },
             '',
         ];
-        let logOutRows = [
+        var logOutRows = [
             '',
             {
                 type: 'component',
@@ -41,13 +56,13 @@ class Me extends React.Component {
                     " \u9000\u51FA\u767B\u5F55")
             },
         ];
-        let rows;
+        var rows;
         if (user === undefined) {
             rows = aboutRows;
             rows.push('');
             rows.push({
                 type: 'component',
-                component: React.createElement("button", { className: "btn btn-success w-100", onClick: () => nav.showLogin(true) },
+                component: React.createElement("button", { className: "btn btn-success w-100", onClick: function () { return nav.showLogin(undefined); } },
                     React.createElement(FA, { name: "sign-out", size: "lg" }),
                     " \u8BF7\u767B\u5F55")
             });
@@ -66,10 +81,11 @@ class Me extends React.Component {
                     onClick: this.changePassword
                 },
             ];
-            rows.push(...aboutRows, ...logOutRows);
+            rows.push.apply(rows, aboutRows.concat(logOutRows));
         }
         return React.createElement(PropGrid, { rows: rows, values: {} });
-    }
-}
+    };
+    return Me;
+}(React.Component));
 export default Me;
 //# sourceMappingURL=tab.js.map

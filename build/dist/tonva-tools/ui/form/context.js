@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8,19 +21,21 @@ import * as React from 'react';
 //import { ArrRow } from './arrRow';
 import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
-export class Context {
-    constructor(form, uiSchema, data, inNode, isRow) {
+var Context = /** @class */ (function () {
+    function Context(form, uiSchema, data, inNode, isRow) {
+        var _a;
+        var _this = this;
         this.widgets = {};
         this.errors = [];
         this.errorWidgets = [];
-        this.renderErrors = observer(() => {
-            let { errors } = this;
+        this.renderErrors = observer(function () {
+            var errors = _this.errors;
             if (errors.length === 0)
                 return null;
-            return React.createElement(React.Fragment, null, errors.map(err => React.createElement("span", { key: err, className: "text-danger inline-block my-1 ml-3" },
+            return React.createElement(React.Fragment, null, errors.map(function (err) { return React.createElement("span", { key: err, className: "text-danger inline-block my-1 ml-3" },
                 React.createElement("i", { className: "fa fa-exclamation-circle" }),
                 " \u00A0",
-                err)));
+                err); }));
         });
         this.form = form;
         this.uiSchema = uiSchema;
@@ -28,220 +43,252 @@ export class Context {
         this.inNode = inNode;
         this.isRow = isRow;
         if (uiSchema !== undefined) {
-            let { rules } = uiSchema;
+            var rules = uiSchema.rules;
             if (rules !== undefined) {
                 this.rules = [];
                 if (Array.isArray(rules) === false)
                     this.rules.push(rules);
                 else
-                    this.rules.push(...rules);
+                    (_a = this.rules).push.apply(_a, rules);
             }
         }
     }
-    getArrRowContexts(arrName) {
+    Context.prototype.getArrRowContexts = function (arrName) {
         if (this.subContexts === undefined)
             this.subContexts = {};
-        let arrRowContexts = this.subContexts[name];
+        var arrRowContexts = this.subContexts[name];
         if (arrRowContexts === undefined)
             this.subContexts[name] = arrRowContexts = {};
         return arrRowContexts;
-    }
-    get arrName() { return undefined; }
-    getValue(itemName) { return this.initData[itemName]; }
-    setValue(itemName, value) {
+    };
+    Object.defineProperty(Context.prototype, "arrName", {
+        get: function () { return undefined; },
+        enumerable: true,
+        configurable: true
+    });
+    Context.prototype.getValue = function (itemName) { return this.initData[itemName]; };
+    Context.prototype.setValue = function (itemName, value) {
         this.initData[itemName] = value;
-        let widget = this.widgets[itemName];
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.setValue(value);
-    }
-    getDisabled(itemName) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.getDisabled = function (itemName) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             return widget.getDisabled();
         return undefined;
-    }
-    setDisabled(itemName, value) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.setDisabled = function (itemName, value) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.setDisabled(value);
-    }
-    getReadOnly(itemName) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.getReadOnly = function (itemName) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.getReadOnly();
         return undefined;
-    }
-    setReadOnly(itemName, value) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.setReadOnly = function (itemName, value) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.setReadOnly(value);
-    }
-    getVisible(itemName) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.getVisible = function (itemName) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.getVisible();
         return undefined;
-    }
-    setVisible(itemName, value) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.setVisible = function (itemName, value) {
+        var widget = this.widgets[itemName];
         if (widget !== undefined)
             widget.setVisible(value);
-    }
-    checkFieldRules() {
-        for (let i in this.widgets) {
+    };
+    Context.prototype.checkFieldRules = function () {
+        for (var i in this.widgets) {
             this.widgets[i].checkRules();
         }
         if (this.subContexts === undefined)
             return;
-        for (let i in this.subContexts) {
-            let arrRowContexts = this.subContexts[i];
-            for (let j in arrRowContexts) {
+        for (var i in this.subContexts) {
+            var arrRowContexts = this.subContexts[i];
+            for (var j in arrRowContexts) {
                 arrRowContexts[j].checkFieldRules();
             }
         }
-    }
-    checkContextRules() {
+    };
+    Context.prototype.checkContextRules = function () {
+        var _a;
         if (this.rules === undefined)
             return;
         this.clearContextErrors();
-        for (let rule of this.rules) {
-            let ret = rule(this);
+        for (var _i = 0, _b = this.rules; _i < _b.length; _i++) {
+            var rule = _b[_i];
+            var ret = rule(this);
             if (ret === undefined)
                 continue;
             if (Array.isArray(ret) === true) {
-                this.errors.push(...ret);
+                (_a = this.errors).push.apply(_a, ret);
             }
             else if (typeof ret === 'string') {
                 this.errors.push(ret);
             }
             else {
-                for (let i in ret)
+                for (var i in ret)
                     this.setError(i, ret[i]);
             }
         }
         if (this.subContexts === undefined)
             return;
-        for (let i in this.subContexts) {
-            let arrRowContexts = this.subContexts[i];
-            for (let j in arrRowContexts) {
-                let rowContext = arrRowContexts[j];
+        for (var i in this.subContexts) {
+            var arrRowContexts = this.subContexts[i];
+            for (var j in arrRowContexts) {
+                var rowContext = arrRowContexts[j];
                 rowContext.removeErrors();
                 rowContext.checkContextRules();
             }
         }
-    }
-    setError(itemName, error) {
-        let widget = this.widgets[itemName];
+    };
+    Context.prototype.setError = function (itemName, error) {
+        var widget = this.widgets[itemName];
         if (widget === undefined)
             return;
         widget.setContextError(error);
         this.addErrorWidget(widget);
-    }
-    clearContextErrors() {
-        for (let i in this.widgets)
+    };
+    Context.prototype.clearContextErrors = function () {
+        for (var i in this.widgets)
             this.widgets[i].clearContextError();
-    }
-    checkRules() {
+    };
+    Context.prototype.checkRules = function () {
         this.checkFieldRules();
         this.checkContextRules();
-    }
-    addErrorWidget(widget) {
-        let pos = this.errorWidgets.findIndex(v => v === widget);
+    };
+    Context.prototype.addErrorWidget = function (widget) {
+        var pos = this.errorWidgets.findIndex(function (v) { return v === widget; });
         if (pos < 0)
             this.errorWidgets.push(widget);
-    }
-    removeErrorWidget(widget) {
-        let pos = this.errorWidgets.findIndex(v => v === widget);
+    };
+    Context.prototype.removeErrorWidget = function (widget) {
+        var pos = this.errorWidgets.findIndex(function (v) { return v === widget; });
         if (pos >= 0)
             this.errorWidgets.splice(pos, 1);
-    }
-    checkHasError() {
-        let ret = (this.errorWidgets.length + this.errors.length) > 0;
+    };
+    Context.prototype.checkHasError = function () {
+        var ret = (this.errorWidgets.length + this.errors.length) > 0;
         if (ret === true)
             return true;
         if (this.subContexts === undefined)
             return false;
-        for (let i in this.subContexts) {
-            let arrRowContexts = this.subContexts[i];
-            for (let j in arrRowContexts) {
+        for (var i in this.subContexts) {
+            var arrRowContexts = this.subContexts[i];
+            for (var j in arrRowContexts) {
                 if (arrRowContexts[j].hasError === true)
                     return true;
             }
         }
         return false;
-    }
-    get hasError() {
-        return this.checkHasError();
-    }
+    };
+    Object.defineProperty(Context.prototype, "hasError", {
+        get: function () {
+            return this.checkHasError();
+        },
+        enumerable: true,
+        configurable: true
+    });
     ;
-    removeErrors() {
+    Context.prototype.removeErrors = function () {
         this.errors.splice(0);
         this.errorWidgets.splice(0);
-        for (let i in this.widgets) {
-            let widget = this.widgets[i];
+        for (var i in this.widgets) {
+            var widget = this.widgets[i];
             if (widget === undefined)
                 continue;
             widget.clearContextError();
         }
-    }
-}
-__decorate([
-    observable
-], Context.prototype, "errors", void 0);
-__decorate([
-    observable
-], Context.prototype, "errorWidgets", void 0);
-__decorate([
-    computed
-], Context.prototype, "hasError", null);
-let rowKeySeed = 1;
-export class RowContext extends Context {
-    constructor(parentContext, arrSchema, data, inNode) {
-        let uiArr;
-        let { uiSchema } = parentContext;
+    };
+    __decorate([
+        observable
+    ], Context.prototype, "errors", void 0);
+    __decorate([
+        observable
+    ], Context.prototype, "errorWidgets", void 0);
+    __decorate([
+        computed
+    ], Context.prototype, "hasError", null);
+    return Context;
+}());
+export { Context };
+var rowKeySeed = 1;
+var RowContext = /** @class */ (function (_super) {
+    __extends(RowContext, _super);
+    function RowContext(parentContext, arrSchema, data, inNode) {
+        var _this = this;
+        var uiArr;
+        var uiSchema = parentContext.uiSchema;
         if (uiSchema !== undefined) {
-            let { items } = uiSchema;
+            var items = uiSchema.items;
             if (items !== undefined)
                 uiArr = items[arrSchema.name];
         }
-        super(parentContext.form, uiArr, data, inNode, true);
-        this.parentContext = parentContext;
-        this.arrSchema = arrSchema;
-        this.rowKey = rowKeySeed++;
-        this.data = data;
+        _this = _super.call(this, parentContext.form, uiArr, data, inNode, true) || this;
+        _this.parentContext = parentContext;
+        _this.arrSchema = arrSchema;
+        _this.rowKey = rowKeySeed++;
+        _this.data = data;
+        return _this;
     }
-    getItemSchema(itemName) { return this.arrSchema.itemSchemas[itemName]; }
-    getUiItem(itemName) {
+    RowContext.prototype.getItemSchema = function (itemName) { return this.arrSchema.itemSchemas[itemName]; };
+    RowContext.prototype.getUiItem = function (itemName) {
         if (this.uiSchema === undefined)
             return undefined;
-        let { items } = this.uiSchema;
+        var items = this.uiSchema.items;
         if (items === undefined)
             return undefined;
         return items[itemName];
-    }
-    get arrName() { return this.arrSchema.name; }
+    };
+    Object.defineProperty(RowContext.prototype, "arrName", {
+        get: function () { return this.arrSchema.name; },
+        enumerable: true,
+        configurable: true
+    });
     //get data() {return this.row.data;}
-    removeErrors() {
-        super.removeErrors();
+    RowContext.prototype.removeErrors = function () {
+        _super.prototype.removeErrors.call(this);
         this.parentContext.removeErrors();
+    };
+    Object.defineProperty(RowContext.prototype, "parentData", {
+        get: function () { return this.parentContext.data; },
+        enumerable: true,
+        configurable: true
+    });
+    return RowContext;
+}(Context));
+export { RowContext };
+var FormContext = /** @class */ (function (_super) {
+    __extends(FormContext, _super);
+    function FormContext(form, inNode) {
+        return _super.call(this, form, form.uiSchema, form.data, inNode, false) || this;
     }
-    get parentData() { return this.parentContext.data; }
-}
-export class FormContext extends Context {
-    constructor(form, inNode) {
-        super(form, form.uiSchema, form.data, inNode, false);
-    }
-    get data() { return this.form.data; }
-    getItemSchema(itemName) { return this.form.itemSchemas[itemName]; }
-    getUiItem(itemName) {
-        let { uiSchema } = this.form;
+    Object.defineProperty(FormContext.prototype, "data", {
+        get: function () { return this.form.data; },
+        enumerable: true,
+        configurable: true
+    });
+    FormContext.prototype.getItemSchema = function (itemName) { return this.form.itemSchemas[itemName]; };
+    FormContext.prototype.getUiItem = function (itemName) {
+        var uiSchema = this.form.uiSchema;
         if (uiSchema === undefined)
             return undefined;
-        let { items } = uiSchema;
+        var items = uiSchema.items;
         if (items === undefined)
             return undefined;
         return items[itemName];
-    }
-}
-export const ContextContainer = React.createContext({});
+    };
+    return FormContext;
+}(Context));
+export { FormContext };
+export var ContextContainer = React.createContext({});
 //# sourceMappingURL=context.js.map

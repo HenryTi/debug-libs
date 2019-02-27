@@ -1,48 +1,66 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 import * as React from 'react';
 import classNames from 'classnames';
 import { Widget } from './widget';
 //const radioStyle:React.CSSProperties = {width:'2em', height:'1.2em'};
-export class RadioWidget extends Widget {
-    constructor() {
-        super(...arguments);
-        this.inputs = {};
+var RadioWidget = /** @class */ (function (_super) {
+    __extends(RadioWidget, _super);
+    function RadioWidget() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.inputs = {};
+        return _this;
     }
-    setElementValue(value) {
-        for (let i in this.inputs) {
-            let input = this.inputs[i];
+    RadioWidget.prototype.setElementValue = function (value) {
+        for (var i in this.inputs) {
+            var input = this.inputs[i];
             input.checked = value === input.value;
         }
-    }
-    setReadOnly(value) {
+    };
+    RadioWidget.prototype.setReadOnly = function (value) {
         this.readOnly = value;
-        for (let i in this.inputs)
+        for (var i in this.inputs)
             this.inputs[i].readOnly = value;
-    }
-    setDisabled(value) {
+    };
+    RadioWidget.prototype.setDisabled = function (value) {
         this.disabled = value;
-        for (let i in this.inputs)
+        for (var i in this.inputs)
             this.inputs[i].disabled = value;
-    }
-    render() {
-        let { defaultValue, list } = this.ui;
-        let { isRow, inNode } = this.context;
-        let rowKey;
+    };
+    RadioWidget.prototype.render = function () {
+        var _this = this;
+        var _a = this.ui, defaultValue = _a.defaultValue, list = _a.list;
+        var _b = this.context, isRow = _b.isRow, inNode = _b.inNode;
+        var rowKey;
         if (isRow === true) {
             rowKey = this.context.rowKey;
         }
-        let cn = classNames(this.className, 'form-radio-inline');
-        return React.createElement("span", { className: cn }, list.map((v, index) => {
-            let { value, title } = v;
-            let name = this.name;
+        var cn = classNames(this.className, 'form-radio-inline');
+        return React.createElement("span", { className: cn }, list.map(function (v, index) {
+            var value = v.value, title = v.title;
+            var name = _this.name;
             if (rowKey !== undefined)
                 name += '-' + rowKey;
             return React.createElement("label", { key: index, className: "form-radio-inline" },
-                React.createElement("input", { ref: input => this.inputs[index] = input, type: "radio", name: name, value: value, defaultChecked: (this.defaultValue || defaultValue) === value }),
+                React.createElement("input", { ref: function (input) { return _this.inputs[index] = input; }, type: "radio", name: name, value: value, defaultChecked: (_this.defaultValue || defaultValue) === value }),
                 title || value);
             //</span>
         }));
-    }
-}
+    };
+    return RadioWidget;
+}(Widget));
+export { RadioWidget };
 /*
 <div className="form-control d-flex border-0"><input
 ref={(input)=>this.input = input}

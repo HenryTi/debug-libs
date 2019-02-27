@@ -49,7 +49,7 @@ class Me extends React.Component {
             rows.push(
                 {
                     type: 'component', 
-                    component: <button className="btn btn-success w-100" onClick={() => nav.showLogin(true)}>
+                    component: <button className="btn btn-success w-100" onClick={() => nav.showLogin(undefined)}>
                         <FA name="sign-out" size="lg" /> 请登录
                     </button>
                 },
@@ -68,7 +68,7 @@ class Me extends React.Component {
                     component: <IconText iconClass="text-info" icon="envelope" text="修改密码" />,
                     onClick: this.changePassword
                 },
-            ]    
+            ]
             rows.push(...aboutRows, ...logOutRows);
         }
         return <PropGrid rows={rows} values={{}} />;

@@ -1,36 +1,42 @@
-export class Data {
-    constructor(name) { this.name = name; }
-    get() {
+var Data = /** @class */ (function () {
+    function Data(name) {
+        this.name = name;
+    }
+    Data.prototype.get = function () {
         if (this.value !== undefined)
             return this.value;
-        let v = localStorage.getItem(this.name);
+        var v = localStorage.getItem(this.name);
         return this.value = v === null ? undefined : JSON.parse(v);
-    }
-    set(value) {
+    };
+    Data.prototype.set = function (value) {
         if (!value) {
             this.clear();
             return;
         }
         this.value = value;
         localStorage.setItem(this.name, JSON.stringify(value));
-    }
-    clear() {
+    };
+    Data.prototype.clear = function () {
         this.value = undefined;
         localStorage.removeItem(this.name);
-    }
-}
-export class LocalData {
-    constructor() {
+    };
+    return Data;
+}());
+export { Data };
+var LocalData = /** @class */ (function () {
+    function LocalData() {
         this.user = new Data('user');
         this.guest = new Data('guest');
         this.unit = new Data('unit');
         this.homeTabCur = new Data('homeTabCur');
     }
-    logoutClear() {
+    LocalData.prototype.logoutClear = function () {
         [
             this.user,
             this.homeTabCur
-        ].map(d => d.clear());
-    }
-}
+        ].map(function (d) { return d.clear(); });
+    };
+    return LocalData;
+}());
+export { LocalData };
 //# sourceMappingURL=local.js.map

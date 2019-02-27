@@ -12,15 +12,15 @@ import { NumberControl } from './numberControl';
 import { PickIdControl } from './pickIdControl';
 import { PickTuidControl } from './pickTuidControl';
 import { PickControl } from './pickControl';
-export const createControl = (form, row) => {
-    let label = row.label;
+export var createControl = function (form, row) {
+    var label = row.label;
     if (row.group !== undefined)
         return createGroupControl(form, label, row);
     if (row.field !== undefined)
         return createFieldControl(form, label, row);
     return new EmptyControl(form, row.help);
 };
-const controls = {
+var controls = {
     "string": StringControl,
     "password": PasswordControl,
     "number": NumberControl,
@@ -32,7 +32,7 @@ const controls = {
     "textarea": TextAreaControl,
     "pick": PickControl,
 };
-const defaultFaces = {
+var defaultFaces = {
     "string": { type: 'string' },
     "number": { type: 'number' },
     "int": { type: 'number' },
@@ -40,7 +40,7 @@ const defaultFaces = {
     "bool": { type: 'checkbox' },
 };
 function createFieldControl(form, label, fieldRow) {
-    let { field, face } = fieldRow;
+    var field = fieldRow.field, face = fieldRow.face;
     switch (typeof field) {
         case 'string':
             field = {
@@ -53,17 +53,17 @@ function createFieldControl(form, label, fieldRow) {
         default:
             return new UnknownControl(form, field, face);
     }
-    let fieldType = field.type || 'string';
+    var fieldType = field.type || 'string';
     if (face === undefined) {
         face = defaultFaces[fieldType];
         if (face === undefined)
             return new UnknownControl(form, field, face);
     }
     else if (face.type === undefined) {
-        let f = defaultFaces[fieldType];
+        var f = defaultFaces[fieldType];
         face.type = f === undefined ? 'string' : f.type;
     }
-    let control = controls[face.type || fieldType] || UnknownControl;
+    var control = controls[face.type || fieldType] || UnknownControl;
     return new control(form, field, face);
 }
 function createGroupControl(form, label, groupRow) {

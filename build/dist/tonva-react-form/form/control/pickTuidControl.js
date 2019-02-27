@@ -1,3 +1,27 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,10 +31,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import * as React from 'react';
 import { observable } from 'mobx';
 import { Control } from './control';
-export class PickTuidControl extends Control {
-    constructor(formView, field, face) {
-        super(formView, field, face);
-        this.onIdChanged = this.onIdChanged.bind(this);
+var PickTuidControl = /** @class */ (function (_super) {
+    __extends(PickTuidControl, _super);
+    function PickTuidControl(formView, field, face) {
+        var _this = _super.call(this, formView, field, face) || this;
+        _this.onIdChanged = _this.onIdChanged.bind(_this);
+        return _this;
         //this.onClick = this.onClick.bind(this);
     }
     /*
@@ -29,28 +55,31 @@ export class PickTuidControl extends Control {
         this.value = id;
         this.caption = caption;
     }*/
-    onIdChanged(id) {
+    PickTuidControl.prototype.onIdChanged = function (id) {
         this.value = id.id;
-    }
-    setInitValues(values) {
-        let v = values[this.field.name];
+    };
+    PickTuidControl.prototype.setInitValues = function (values) {
+        var v = values[this.field.name];
         this.value = v;
-    }
-    buildContent() {
+    };
+    PickTuidControl.prototype.buildContent = function () {
+        var _this = this;
         //let {tuid, input} = this.face;
-        return React.createElement(this.face.input.component, Object.assign({}, this.face, { id: this.value, 
+        return React.createElement(this.face.input.component, __assign({}, this.face, { id: this.value, 
             //ui={this.face.ui}
             //input={input}
             //entitiesUI={this.formView.props.context} 
-            onFormValues: () => this.formView.readValues(), onIdChanged: this.onIdChanged }));
-    }
-    renderControl() {
+            onFormValues: function () { return _this.formView.readValues(); }, onIdChanged: this.onIdChanged }));
+    };
+    PickTuidControl.prototype.renderControl = function () {
         return React.createElement("div", { className: "form-control-static " }, this.buildContent());
-    }
-}
-__decorate([
-    observable
-], PickTuidControl.prototype, "caption", void 0);
+    };
+    __decorate([
+        observable
+    ], PickTuidControl.prototype, "caption", void 0);
+    return PickTuidControl;
+}(Control));
+export { PickTuidControl };
 /*
 <button className="form-control btn btn-outline-info"
 type="button"

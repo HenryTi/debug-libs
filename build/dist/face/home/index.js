@@ -1,9 +1,9 @@
 import * as React from 'react';
 import Loadable from 'react-loadable';
 import { Loading } from 'tonva-tools';
-export const homeTab = () => {
-    let LoadableComponent = Loadable({
-        loader: () => import('./tab'),
+export var homeTab = function () {
+    var LoadableComponent = Loadable({
+        loader: function () { return import('./tab'); },
         loading: Loading
     });
     return React.createElement(LoadableComponent, null);

@@ -1,5 +1,5 @@
 import { observable } from 'mobx';
-export const store = {
+export var store = {
     homeCount: observable.box(-1),
     cartCount: observable.box(101),
 };

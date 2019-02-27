@@ -1,5 +1,5 @@
-const ip = "192.168.0.199";
-const consts = {
+var ip = "192.168.0.199";
+var consts = {
     "serverUrl": ip + ":3000/",
     "systemAdmin": {
         "name": "同花",

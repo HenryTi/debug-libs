@@ -1,4 +1,4 @@
-export const formRes = {
+export var formRes = {
     _: {
         required: 'required',
         number: 'not valid number',

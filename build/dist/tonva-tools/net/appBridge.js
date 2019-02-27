@@ -6,23 +6,58 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 import _ from 'lodash';
 import { nav } from '../ui';
 import { uid } from '../uid';
 import { uqTokenApi as uqTokenApi, callCenterapi, CenterAppApi, centerToken } from './uqApi';
 import { setSubAppWindow } from './wsChannel';
 import { host } from './host';
-const uqTokens = {};
+var uqTokens = {};
 export function logoutUqTokens() {
-    for (let i in uqTokens)
+    for (var i in uqTokens)
         uqTokens[i] = undefined;
 }
-const appsInFrame = {};
-class AppInFrameClass {
-    get unit() { return this._unit; } // unit id
-    set unit(val) { this._unit = val; }
-}
-export let meInFrame = new AppInFrameClass();
+var appsInFrame = {};
+var AppInFrameClass = /** @class */ (function () {
+    function AppInFrameClass() {
+    }
+    Object.defineProperty(AppInFrameClass.prototype, "unit", {
+        get: function () { return this._unit; } // unit id
+        ,
+        set: function (val) { this._unit = val; },
+        enumerable: true,
+        configurable: true
+    });
+    return AppInFrameClass;
+}());
+export var meInFrame = new AppInFrameClass();
 /* {
     hash: undefined,
     get unit():number {return } undefined, //debugUnitId,
@@ -33,105 +68,151 @@ export function isBridged() {
     return self !== window.parent;
 }
 window.addEventListener('message', function (evt) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var message = evt.data;
-        switch (message.type) {
-            case 'sub-frame-started':
-                subFrameStarted(evt);
-                break;
-            case 'ws':
+    return __awaiter(this, void 0, void 0, function () {
+        var message, _a, ret;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    message = evt.data;
+                    _a = message.type;
+                    switch (_a) {
+                        case 'sub-frame-started': return [3 /*break*/, 1];
+                        case 'ws': return [3 /*break*/, 2];
+                        case 'init-sub-win': return [3 /*break*/, 4];
+                        case 'pop-app': return [3 /*break*/, 6];
+                        case 'center-api': return [3 /*break*/, 7];
+                        case 'center-api-return': return [3 /*break*/, 9];
+                        case 'app-api': return [3 /*break*/, 10];
+                        case 'app-api-return': return [3 /*break*/, 12];
+                    }
+                    return [3 /*break*/, 14];
+                case 1:
+                    subFrameStarted(evt);
+                    return [3 /*break*/, 15];
+                case 2: 
                 //wsBridge.receive(message.msg);
-                yield nav.onReceive(message.msg);
-                break;
-            case 'init-sub-win':
-                yield initSubWin(message);
-                break;
-            case 'pop-app':
-                nav.navBack();
-                break;
-            case 'center-api':
-                yield callCenterApiFromMessage(evt.source, message);
-                break;
-            case 'center-api-return':
-                bridgeCenterApiReturn(message);
-                break;
-            case 'app-api':
-                console.log("receive PostMessage: %s", JSON.stringify(message));
-                let ret = yield onReceiveAppApiMessage(message.hash, message.apiName);
-                console.log("onReceiveAppApiMessage: %s", JSON.stringify(ret));
-                evt.source.postMessage({
-                    type: 'app-api-return',
-                    apiName: message.apiName,
-                    url: ret.url,
-                    urlDebug: ret.urlDebug,
-                    token: ret.token
-                }, "*");
-                break;
-            case 'app-api-return':
-                console.log("app-api-return: %s", JSON.stringify(message));
-                console.log('await onAppApiReturn(message);');
-                yield onAppApiReturn(message);
-                break;
-            default:
-                this.console.log('message: %s', JSON.stringify(message));
-                break;
-        }
+                return [4 /*yield*/, nav.onReceive(message.msg)];
+                case 3:
+                    //wsBridge.receive(message.msg);
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 4: return [4 /*yield*/, initSubWin(message)];
+                case 5:
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 6:
+                    nav.navBack();
+                    return [3 /*break*/, 15];
+                case 7: return [4 /*yield*/, callCenterApiFromMessage(evt.source, message)];
+                case 8:
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 9:
+                    bridgeCenterApiReturn(message);
+                    return [3 /*break*/, 15];
+                case 10:
+                    console.log("receive PostMessage: %s", JSON.stringify(message));
+                    return [4 /*yield*/, onReceiveAppApiMessage(message.hash, message.apiName)];
+                case 11:
+                    ret = _b.sent();
+                    console.log("onReceiveAppApiMessage: %s", JSON.stringify(ret));
+                    evt.source.postMessage({
+                        type: 'app-api-return',
+                        apiName: message.apiName,
+                        url: ret.url,
+                        urlDebug: ret.urlDebug,
+                        token: ret.token
+                    }, "*");
+                    return [3 /*break*/, 15];
+                case 12:
+                    console.log("app-api-return: %s", JSON.stringify(message));
+                    console.log('await onAppApiReturn(message);');
+                    return [4 /*yield*/, onAppApiReturn(message)];
+                case 13:
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 14:
+                    this.console.log('message: %s', JSON.stringify(message));
+                    return [3 /*break*/, 15];
+                case 15: return [2 /*return*/];
+            }
+        });
     });
 });
 function subFrameStarted(evt) {
     var message = evt.data;
-    let subWin = evt.source;
+    var subWin = evt.source;
     setSubAppWindow(subWin);
     hideFrameBack(message.hash);
-    let msg = _.clone(nav.user);
+    var msg = _.clone(nav.user);
     msg.type = 'init-sub-win';
     subWin.postMessage(msg, '*');
 }
 function hideFrameBack(hash) {
-    let el = document.getElementById(hash);
+    var el = document.getElementById(hash);
     if (el !== undefined)
         el.hidden = true;
 }
 function initSubWin(message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log('initSubWin: set nav.user', message);
-        nav.user = message; // message.user;
-        yield nav.showAppView();
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log('initSubWin: set nav.user', message);
+                    nav.user = message; // message.user;
+                    return [4 /*yield*/, nav.showAppView()];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
     });
 }
 function onReceiveAppApiMessage(hash, apiName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let appInFrame = appsInFrame[hash];
-        if (appInFrame === undefined)
-            return { name: apiName, url: undefined, urlDebug: undefined, token: undefined };
-        let { unit } = appInFrame;
-        let parts = apiName.split('/');
-        let ret = yield uqTokenApi.uq({ unit: unit, uqOwner: parts[0], uqName: parts[1] });
-        if (ret === undefined) {
-            console.log('apiTokenApi.api return undefined. api=%s, unit=%s', apiName, unit);
-            throw 'api not found';
-        }
-        return { name: apiName, url: ret.url, urlDebug: ret.urlDebug, token: ret.token };
+    return __awaiter(this, void 0, void 0, function () {
+        var appInFrame, unit, parts, ret;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    appInFrame = appsInFrame[hash];
+                    if (appInFrame === undefined)
+                        return [2 /*return*/, { name: apiName, url: undefined, urlDebug: undefined, token: undefined }];
+                    unit = appInFrame.unit;
+                    parts = apiName.split('/');
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit, uqOwner: parts[0], uqName: parts[1] })];
+                case 1:
+                    ret = _a.sent();
+                    if (ret === undefined) {
+                        console.log('apiTokenApi.api return undefined. api=%s, unit=%s', apiName, unit);
+                        throw 'api not found';
+                    }
+                    return [2 /*return*/, { name: apiName, url: ret.url, urlDebug: ret.urlDebug, token: ret.token }];
+            }
+        });
     });
 }
 function onAppApiReturn(message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { apiName, url, urlDebug, token } = message;
-        let action = uqTokens[apiName];
-        if (action === undefined) {
-            throw 'error app api return';
-            //return;
-        }
-        let realUrl = host.getUrlOrDebug(url, urlDebug);
-        console.log('onAppApiReturn(message:any): url=' + url + ', debug=' + urlDebug + ', real=' + realUrl);
-        action.url = realUrl;
-        action.token = token;
-        action.resolve(action);
+    return __awaiter(this, void 0, void 0, function () {
+        var apiName, url, urlDebug, token, action, realUrl;
+        return __generator(this, function (_a) {
+            apiName = message.apiName, url = message.url, urlDebug = message.urlDebug, token = message.token;
+            action = uqTokens[apiName];
+            if (action === undefined) {
+                throw 'error app api return';
+                //return;
+            }
+            realUrl = host.getUrlOrDebug(url, urlDebug);
+            console.log('onAppApiReturn(message:any): url=' + url + ', debug=' + urlDebug + ', real=' + realUrl);
+            action.url = realUrl;
+            action.token = token;
+            action.resolve(action);
+            return [2 /*return*/];
+        });
     });
 }
 export function setMeInFrame(appHash) {
-    let parts = appHash.split('-');
-    let len = parts.length;
+    var parts = appHash.split('-');
+    var len = parts.length;
     meInFrame.hash = parts[0].substr(3);
     if (len > 0)
         meInFrame.unit = Number(parts[1]);
@@ -142,10 +223,10 @@ export function setMeInFrame(appHash) {
     return meInFrame;
 }
 export function appUrl(url, unitId, page, param) {
-    let u;
+    var u;
     for (;;) {
         u = uid();
-        let a = appsInFrame[u];
+        var a = appsInFrame[u];
         if (a === undefined) {
             appsInFrame[u] = { hash: u, unit: unitId };
             break;
@@ -155,7 +236,7 @@ export function appUrl(url, unitId, page, param) {
     if (page !== undefined) {
         url += '-' + page;
         if (param !== undefined) {
-            for (let i = 0; i < param.length; i++) {
+            for (var i = 0; i < param.length; i++) {
                 url += '-' + param[i];
             }
         }
@@ -163,107 +244,151 @@ export function appUrl(url, unitId, page, param) {
     return { url: url, hash: u };
 }
 export function loadAppUqs(appOwner, appName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let centerAppApi = new CenterAppApi('tv/', undefined);
-        let unit = meInFrame.unit;
-        let ret = yield centerAppApi.uqs(unit, appOwner, appName);
-        centerAppApi.checkUqs(unit, appOwner, appName).then(v => {
-            if (v === false)
-                nav.start();
+    return __awaiter(this, void 0, void 0, function () {
+        var centerAppApi, unit, ret;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    centerAppApi = new CenterAppApi('tv/', undefined);
+                    unit = meInFrame.unit;
+                    return [4 /*yield*/, centerAppApi.uqs(unit, appOwner, appName)];
+                case 1:
+                    ret = _a.sent();
+                    centerAppApi.checkUqs(unit, appOwner, appName).then(function (v) {
+                        if (v === false)
+                            nav.start();
+                    });
+                    return [2 /*return*/, ret];
+            }
         });
-        return ret;
     });
 }
 export function appUq(uq, uqOwner, uqName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let uqToken = uqTokens[uq];
-        if (uqToken !== undefined)
-            return uqToken;
-        if (!isBridged()) {
-            uqToken = yield uqTokenApi.uq({ unit: meInFrame.unit, uqOwner: uqOwner, uqName: uqName });
-            if (uqToken === undefined) {
-                let err = 'unauthorized call: uqTokenApi center return undefined!';
-                throw err;
+    return __awaiter(this, void 0, void 0, function () {
+        var uqToken, err, url, urlDebug, realUrl;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    uqToken = uqTokens[uq];
+                    if (uqToken !== undefined)
+                        return [2 /*return*/, uqToken];
+                    if (!!isBridged()) return [3 /*break*/, 2];
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: meInFrame.unit, uqOwner: uqOwner, uqName: uqName })];
+                case 1:
+                    uqToken = _a.sent();
+                    if (uqToken === undefined) {
+                        err = 'unauthorized call: uqTokenApi center return undefined!';
+                        throw err;
+                    }
+                    if (uqToken.token === undefined)
+                        uqToken.token = centerToken;
+                    url = uqToken.url, urlDebug = uqToken.urlDebug;
+                    realUrl = host.getUrlOrDebug(url, urlDebug);
+                    console.log('realUrl: %s', realUrl);
+                    uqToken.url = realUrl;
+                    uqTokens[uq] = uqToken;
+                    return [2 /*return*/, uqToken];
+                case 2:
+                    console.log("appApi parent send: %s", meInFrame.hash);
+                    uqToken = {
+                        name: uq,
+                        url: undefined,
+                        urlDebug: undefined,
+                        token: undefined,
+                        resolve: undefined,
+                        reject: undefined,
+                    };
+                    uqTokens[uq] = uqToken;
+                    return [2 /*return*/, new Promise(function (resolve, reject) {
+                            uqToken.resolve = function (at) { return __awaiter(_this, void 0, void 0, function () {
+                                var a;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, at];
+                                        case 1:
+                                            a = _a.sent();
+                                            console.log('return from parent window: %s', JSON.stringify(a));
+                                            uqToken.url = a.url;
+                                            uqToken.urlDebug = a.urlDebug;
+                                            uqToken.token = a.token;
+                                            resolve(uqToken);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            uqToken.reject = reject;
+                            (window.opener || window.parent).postMessage({
+                                type: 'app-api',
+                                apiName: uq,
+                                hash: meInFrame.hash,
+                            }, "*");
+                        })];
             }
-            if (uqToken.token === undefined)
-                uqToken.token = centerToken;
-            let { url, urlDebug } = uqToken;
-            let realUrl = host.getUrlOrDebug(url, urlDebug);
-            console.log('realUrl: %s', realUrl);
-            uqToken.url = realUrl;
-            uqTokens[uq] = uqToken;
-            return uqToken;
-        }
-        console.log("appApi parent send: %s", meInFrame.hash);
-        uqToken = {
-            name: uq,
-            url: undefined,
-            urlDebug: undefined,
-            token: undefined,
-            resolve: undefined,
-            reject: undefined,
-        };
-        uqTokens[uq] = uqToken;
-        return new Promise((resolve, reject) => {
-            uqToken.resolve = (at) => __awaiter(this, void 0, void 0, function* () {
-                let a = yield at;
-                console.log('return from parent window: %s', JSON.stringify(a));
-                uqToken.url = a.url;
-                uqToken.urlDebug = a.urlDebug;
-                uqToken.token = a.token;
-                resolve(uqToken);
-            });
-            uqToken.reject = reject;
-            (window.opener || window.parent).postMessage({
-                type: 'app-api',
-                apiName: uq,
-                hash: meInFrame.hash,
-            }, "*");
         });
     });
 }
-const brideCenterApis = {};
+var brideCenterApis = {};
 export function bridgeCenterApi(url, method, body) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log('bridgeCenterApi: url=%s, method=%s', url, method);
-        return yield new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            let callId;
-            for (;;) {
-                callId = uid();
-                let bca = brideCenterApis[callId];
-                if (bca === undefined) {
-                    brideCenterApis[callId] = {
-                        id: callId,
-                        resolve: resolve,
-                        reject: reject,
-                    };
-                    break;
-                }
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log('bridgeCenterApi: url=%s, method=%s', url, method);
+                    return [4 /*yield*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                            var callId, bca;
+                            return __generator(this, function (_a) {
+                                for (;;) {
+                                    callId = uid();
+                                    bca = brideCenterApis[callId];
+                                    if (bca === undefined) {
+                                        brideCenterApis[callId] = {
+                                            id: callId,
+                                            resolve: resolve,
+                                            reject: reject,
+                                        };
+                                        break;
+                                    }
+                                }
+                                (window.opener || window.parent).postMessage({
+                                    type: 'center-api',
+                                    callId: callId,
+                                    url: url,
+                                    method: method,
+                                    body: body
+                                }, '*');
+                                return [2 /*return*/];
+                            });
+                        }); })];
+                case 1: return [2 /*return*/, _a.sent()];
             }
-            (window.opener || window.parent).postMessage({
-                type: 'center-api',
-                callId: callId,
-                url: url,
-                method: method,
-                body: body
-            }, '*');
-        }));
+        });
     });
 }
 function callCenterApiFromMessage(from, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { callId, url, method, body } = message;
-        let result = yield callCenterapi.directCall(url, method, body);
-        from.postMessage({
-            type: 'center-api-return',
-            callId: callId,
-            result: result,
-        }, '*');
+    return __awaiter(this, void 0, void 0, function () {
+        var callId, url, method, body, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    callId = message.callId, url = message.url, method = message.method, body = message.body;
+                    return [4 /*yield*/, callCenterapi.directCall(url, method, body)];
+                case 1:
+                    result = _a.sent();
+                    from.postMessage({
+                        type: 'center-api-return',
+                        callId: callId,
+                        result: result,
+                    }, '*');
+                    return [2 /*return*/];
+            }
+        });
     });
 }
 function bridgeCenterApiReturn(message) {
-    let { callId, result } = message;
-    let bca = brideCenterApis[callId];
+    var callId = message.callId, result = message.result;
+    var bca = brideCenterApis[callId];
     if (bca === undefined)
         return;
     brideCenterApis[callId] = undefined;
