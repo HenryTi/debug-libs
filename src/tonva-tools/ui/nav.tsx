@@ -8,14 +8,14 @@ import {FetchError} from '../fetchError';
 import {appUrl, setMeInFrame, logoutUqTokens} from '../net/appBridge';
 import {LocalData} from '../local';
 import {guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, meInFrame, isDevelopment, host} from '../net';
+import { WsBase, wsBridge } from '../net/wsChannel';
+import { resOptions } from './res';
+import { Loading } from './loading';
+
 import 'font-awesome/css/font-awesome.min.css';
 import '../css/va-form.css';
 import '../css/va.css';
 import '../css/animation.css';
-import { WsBase, wsBridge } from '../net/wsChannel';
-import { resOptions } from './res';
-import { Loading } from './loading';
-import { Callbacks, Callback } from './callbacks';
 
 const regEx = new RegExp('Android|webOS|iPhone|iPad|' +
     'BlackBerry|Windows Phone|'  +
@@ -319,10 +319,11 @@ export class NavView extends React.Component<Props, State> {
                 break;
             case 2:
                 elWait = <li className="va-wait va-wait2">
-                    <i className="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                    <span className="sr-only">Loading...</span>
+                    <Loading />
                 </li>;
                 break;
+                //<i className="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                //<span className="sr-only">Loading...</span>
         }
         if (fetchError)
             elError = <FetchErrorView clearError={this.clearError} {...fetchError} />
@@ -430,56 +431,64 @@ export class Nav {
     private isInFrame:boolean;
     private centerHost: string;
     async start() {
-        nav.clear();
-        nav.push(<Page header={false}><Loading /></Page>);
-        await host.start();
-        let {url, ws, resHost} = host;
-        this.centerHost = url;
-        this.resUrl = 'http://' + resHost + '/res/';
-        this.wsHost = ws;
-        setCenterUrl(url);
-        
-        let unit = await this.loadUnit();
-        meInFrame.unit = unit;
+        try {
+            nav.clear();
+            //nav.push(<Page header={false}><Loading /></Page>);
+            this.startWait();
+            await host.start();
+            let {url, ws, resHost} = host;
+            this.centerHost = url;
+            this.resUrl = 'http://' + resHost + '/res/';
+            this.wsHost = ws;
+            setCenterUrl(url);
+            
+            let unit = await this.loadUnit();
+            meInFrame.unit = unit;
 
-        let guest:Guest = this.local.guest.get();
-        if (guest === undefined) {
-            guest = await guestApi.guest();
-        }
-        nav.setGuest(guest);
+            let guest:Guest = this.local.guest.get();
+            if (guest === undefined) {
+                guest = await guestApi.guest();
+            }
+            nav.setGuest(guest);
 
-        let hash = document.location.hash;
-        // document.title = document.location.origin;
-        console.log("url=%s hash=%s", document.location.origin, hash);
-        this.isInFrame = hash !== undefined && hash !== '' && hash.startsWith('#tv');
-        if (this.isInFrame === true) {
-            let mif = setMeInFrame(hash);
-            if (mif !== undefined) {
-                this.ws = wsBridge;
-                console.log('this.ws = wsBridge in sub frame');
-                //nav.user = {id:0} as User;
-                if (self !== window.parent) {
-                    window.parent.postMessage({type:'sub-frame-started', hash: mif.hash}, '*');
+            let hash = document.location.hash;
+            // document.title = document.location.origin;
+            console.log("url=%s hash=%s", document.location.origin, hash);
+            this.isInFrame = hash !== undefined && hash !== '' && hash.startsWith('#tv');
+            if (this.isInFrame === true) {
+                let mif = setMeInFrame(hash);
+                if (mif !== undefined) {
+                    this.ws = wsBridge;
+                    console.log('this.ws = wsBridge in sub frame');
+                    //nav.user = {id:0} as User;
+                    if (self !== window.parent) {
+                        window.parent.postMessage({type:'sub-frame-started', hash: mif.hash}, '*');
+                    }
+                    // 下面这一句，已经移到 appBridge.ts 里面的 initSubWin，也就是响应从main frame获得user之后开始。
+                    //await this.showAppView();
+                    return;
                 }
-                // 下面这一句，已经移到 appBridge.ts 里面的 initSubWin，也就是响应从main frame获得user之后开始。
-                //await this.showAppView();
+            }
+
+            let user: User = this.local.user.get();
+            if (user === undefined) {
+                let {notLogined} = this.nav.props;
+                if (notLogined !== undefined) {
+                    await notLogined();
+                }
+                else {
+                    await nav.showLogin(undefined);
+                }
                 return;
             }
-        }
 
-        let user: User = this.local.user.get();
-        if (user === undefined) {
-            let {notLogined} = this.nav.props;
-            if (notLogined !== undefined) {
-                await notLogined();
-            }
-            else {
-                await nav.showLogin(undefined);
-            }
-            return;
+            await nav.logined(user);
         }
-
-        await nav.logined(user);
+        catch (err) {
+        }
+        finally {
+            this.endWait();
+        }
     }
 
     async showAppView() {
@@ -501,23 +510,9 @@ export class Nav {
     saveLocalUser() {
         this.local.user.set(this.user);
     }
-    /*
-    private loginCallbacks = new Callbacks<(user: User)=>Promise<void>>();
-    private logoutCallbacks = new Callbacks<()=>Promise<void>>();
-    registerLoginCallback(callback: (user:User)=>Promise<void>) {
-        this.loginCallbacks.register(callback);
-    }
-    unregisterLoginCallback(callback: (user:User)=>Promise<void>) {
-        this.loginCallbacks.unregister(callback);
-    }
-    registerLogoutCallback(callback: ()=>Promise<void>) {
-        this.logoutCallbacks.register(callback);
-    }
-    unregisterLogoutCallback(callback: ()=>Promise<void>) {
-        this.logoutCallbacks.unregister(callback);
-    }
-    */
+
     async logined(user: User, callback?: (user:User)=>Promise<void>) {
+        logoutApis();
         let ws:WSChannel = this.ws = new WSChannel(this.wsHost, user.token);
         ws.connect();
 
@@ -533,9 +528,9 @@ export class Nav {
         }
     }
 
-    async showLogin(callback?: (user:User)=>Promise<void>, withBack?:boolean) {
+    async showLogin(callback?: (user:User)=>Promise<void>, top?:any, withBack?:boolean) {
         let lv = await import('../entry/login');
-        let loginView = <lv.default withBack={withBack} callback={callback} />;
+         let loginView = <lv.default withBack={withBack} callback={callback} top={top} />;
         if (withBack !== true) {
             this.nav.clear();
             this.pop();
@@ -558,7 +553,6 @@ export class Nav {
         this.local.logoutClear();
         this.user = undefined; //{} as User;
         logoutApis();
-        logoutUqTokens();
         let guest = this.local.guest.get();
         setCenterToken(0, guest && guest.token);
         this.ws = undefined;
@@ -574,6 +568,11 @@ export class Nav {
             await nav.start();
         else
             await callback();
+    }
+
+    async changePassword() {
+        let cp = await import('../entry/changePassword');
+        nav.push(<cp.ChangePasswordPage />);
     }
 
     get level(): number {

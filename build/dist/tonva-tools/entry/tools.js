@@ -5,9 +5,12 @@ export var tonvaTop = React.createElement("div", { className: "d-flex align-item
     React.createElement("div", { className: "h3 flex-fill text-center" },
         React.createElement("span", { className: "text-primary mr-3" }, "\u540C"),
         React.createElement("span", { className: "text-danger" }, "\u82B1")));
+var mobileRegex = /^[0-9]*$/;
+var emailRegex = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
+// /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
 var senders = [
-    { type: 'mobile', caption: '手机号', regex: /^[0-9]*$/ },
-    { type: 'email', caption: '邮箱', regex: /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/ }
+    { type: 'mobile', caption: '手机号', regex: mobileRegex },
+    { type: 'email', caption: '邮箱', regex: emailRegex }
 ];
 export function getSender(un) {
     var sender = senders.find(function (v) { return v.regex.test(un) === true; });

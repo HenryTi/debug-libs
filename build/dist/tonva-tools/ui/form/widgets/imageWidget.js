@@ -11,6 +11,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -47,62 +53,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import * as React from 'react';
-import { nav } from './nav';
-var ResUploader = /** @class */ (function (_super) {
-    __extends(ResUploader, _super);
-    function ResUploader() {
+import classNames from 'classnames';
+import { Widget } from './widget';
+import { Image } from '../../image';
+import { ImageItemEdit } from '../../edit/imageItemEdit';
+import { observer } from 'mobx-react';
+import { observable } from 'mobx';
+var ImageWidget = /** @class */ (function (_super) {
+    __extends(ImageWidget, _super);
+    function ImageWidget() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.upload = function () { return __awaiter(_this, void 0, void 0, function () {
-            var maxSize, resUrl, files, data, len, i, file, abortController, res, json, err_1;
+        _this.onClick = function () { return __awaiter(_this, void 0, void 0, function () {
+            var edit, ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        maxSize = this.props.maxSize;
-                        if (maxSize === undefined || maxSize <= 0)
-                            maxSize = 100000000000;
-                        else
-                            maxSize = maxSize * 1024;
-                        resUrl = nav.resUrl + 'upload';
-                        files = this.fileInput.files;
-                        data = new FormData();
-                        len = files.length;
-                        for (i = 0; i < len; i++) {
-                            file = files[i];
-                            if (file.size > maxSize)
-                                return [2 /*return*/, null];
-                            data.append('files[]', file, file.name);
-                        }
-                        _a.label = 1;
+                        edit = new ImageItemEdit(this.itemSchema, this.ui, this.ui.label, this.value);
+                        return [4 /*yield*/, edit.start()];
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
-                        abortController = new AbortController();
-                        return [4 /*yield*/, fetch(resUrl, {
-                                method: "POST",
-                                body: data,
-                                signal: abortController.signal,
-                            })];
+                        ret = _a.sent();
+                        if (ret !== null) {
+                            this.setValue(ret);
+                            this.imageSrc = ret;
+                        }
+                        return [4 /*yield*/, edit.end()];
                     case 2:
-                        res = _a.sent();
-                        return [4 /*yield*/, res.json()];
-                    case 3:
-                        json = _a.sent();
-                        return [2 /*return*/, ':' + json.res.id];
-                    case 4:
-                        err_1 = _a.sent();
-                        console.error('%s %s', resUrl, err_1);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
+                        _a.sent();
+                        return [2 /*return*/];
                 }
             });
         }); };
+        _this.observerRender = observer(function () {
+            var cn = [
+                'bg-white p-1 d-flex justify-content-center',
+            ];
+            var onClick;
+            if (!_this.readOnly && !_this.disabled) {
+                cn.push('cursor-pointer');
+                onClick = _this.onClick;
+            }
+            return React.createElement("div", { className: classNames(cn), onClick: onClick },
+                React.createElement(Image, { src: _this.imageSrc, className: "w-4c h-4c" }));
+        });
         return _this;
     }
-    ResUploader.prototype.render = function () {
-        var _this = this;
-        var _a = this.props, className = _a.className, multiple = _a.multiple, onFilesChange = _a.onFilesChange;
-        return React.createElement("input", { className: className, ref: function (t) { return _this.fileInput = t; }, onChange: onFilesChange, type: 'file', name: 'file', multiple: multiple });
+    ImageWidget.prototype.init = function () {
+        _super.prototype.init.call(this);
+        this.imageSrc = this.value;
     };
-    return ResUploader;
-}(React.Component));
-export { ResUploader };
-//# sourceMappingURL=resUploader.js.map
+    ImageWidget.prototype.render = function () {
+        return React.createElement(this.observerRender, null);
+    };
+    __decorate([
+        observable
+    ], ImageWidget.prototype, "imageSrc", void 0);
+    return ImageWidget;
+}(Widget));
+export { ImageWidget };
+//# sourceMappingURL=imageWidget.js.map

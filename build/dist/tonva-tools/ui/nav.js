@@ -68,16 +68,16 @@ import { observable } from 'mobx';
 import { Page } from './page';
 import { netToken } from '../net/netToken';
 import FetchErrorView from './fetchErrorView';
-import { appUrl, setMeInFrame, logoutUqTokens } from '../net/appBridge';
+import { appUrl, setMeInFrame } from '../net/appBridge';
 import { LocalData } from '../local';
 import { guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, meInFrame, isDevelopment, host } from '../net';
+import { wsBridge } from '../net/wsChannel';
+import { resOptions } from './res';
+import { Loading } from './loading';
 import 'font-awesome/css/font-awesome.min.css';
 import '../css/va-form.css';
 import '../css/va.css';
 import '../css/animation.css';
-import { wsBridge } from '../net/wsChannel';
-import { resOptions } from './res';
-import { Loading } from './loading';
 var regEx = new RegExp('Android|webOS|iPhone|iPad|' +
     'BlackBerry|Windows Phone|' +
     'Opera Mini|IEMobile|Mobile', 'i');
@@ -282,15 +282,31 @@ var NavView = /** @class */ (function (_super) {
         //console.log('pop: %s pages', stack.length);
     };
     NavView.prototype.popTo = function (key) {
-        throw new Error('to be designed');
+        if (key === undefined)
+            return;
+        if (this.stack.find(function (v) { return v.key === key; }) === undefined)
+            return;
+        while (this.stack.length > 0) {
+            var len = this.stack.length;
+            var top_1 = this.stack[len - 1];
+            if (top_1.key === key)
+                break;
+            this.pop();
+        }
+    };
+    NavView.prototype.topKey = function () {
+        var len = this.stack.length;
+        if (len === 0)
+            return undefined;
+        return this.stack[len - 1].key;
     };
     NavView.prototype.removeCeased = function () {
         for (;;) {
             var p = this.stack.length - 1;
             if (p < 0)
                 break;
-            var top_1 = this.stack[p];
-            if (top_1.ceased === false)
+            var top_2 = this.stack[p];
+            if (top_2.ceased === false)
                 break;
             var item = this.stack.pop();
             var disposer = item.disposer;
@@ -386,9 +402,10 @@ var NavView = /** @class */ (function (_super) {
                 break;
             case 2:
                 elWait = React.createElement("li", { className: "va-wait va-wait2" },
-                    React.createElement("i", { className: "fa fa-spinner fa-spin fa-3x fa-fw" }),
-                    React.createElement("span", { className: "sr-only" }, "Loading..."));
+                    React.createElement(Loading, null));
                 break;
+            //<i className="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+            //<span className="sr-only">Loading...</span>
         }
         if (fetchError)
             elError = React.createElement(FetchErrorView, __assign({ clearError: this.clearError }, fetchError));
@@ -520,13 +537,14 @@ var Nav = /** @class */ (function () {
     };
     Nav.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, ws, resHost, unit, guest, hash, mif, user, notLogined;
+            var url, ws, resHost, unit, guest, hash, mif, user, notLogined, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        _a.trys.push([0, 11, 12, 13]);
                         nav.clear();
-                        nav.push(React.createElement(Page, { header: false },
-                            React.createElement(Loading, null)));
+                        //nav.push(<Page header={false}><Loading /></Page>);
+                        this.startWait();
                         return [4 /*yield*/, host.start()];
                     case 1:
                         _a.sent();
@@ -581,7 +599,14 @@ var Nav = /** @class */ (function () {
                     case 9: return [4 /*yield*/, nav.logined(user)];
                     case 10:
                         _a.sent();
-                        return [2 /*return*/];
+                        return [3 /*break*/, 13];
+                    case 11:
+                        err_2 = _a.sent();
+                        return [3 /*break*/, 13];
+                    case 12:
+                        this.endWait();
+                        return [7 /*endfinally*/];
+                    case 13: return [2 /*return*/];
                 }
             });
         });
@@ -614,28 +639,13 @@ var Nav = /** @class */ (function () {
     Nav.prototype.saveLocalUser = function () {
         this.local.user.set(this.user);
     };
-    /*
-    private loginCallbacks = new Callbacks<(user: User)=>Promise<void>>();
-    private logoutCallbacks = new Callbacks<()=>Promise<void>>();
-    registerLoginCallback(callback: (user:User)=>Promise<void>) {
-        this.loginCallbacks.register(callback);
-    }
-    unregisterLoginCallback(callback: (user:User)=>Promise<void>) {
-        this.loginCallbacks.unregister(callback);
-    }
-    registerLogoutCallback(callback: ()=>Promise<void>) {
-        this.logoutCallbacks.register(callback);
-    }
-    unregisterLogoutCallback(callback: ()=>Promise<void>) {
-        this.logoutCallbacks.unregister(callback);
-    }
-    */
     Nav.prototype.logined = function (user, callback) {
         return __awaiter(this, void 0, void 0, function () {
             var ws;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        logoutApis();
                         ws = this.ws = new WSChannel(this.wsHost, user.token);
                         ws.connect();
                         console.log("logined: %s", JSON.stringify(user));
@@ -654,7 +664,7 @@ var Nav = /** @class */ (function () {
             });
         });
     };
-    Nav.prototype.showLogin = function (callback, withBack) {
+    Nav.prototype.showLogin = function (callback, top, withBack) {
         return __awaiter(this, void 0, void 0, function () {
             var lv, loginView;
             return __generator(this, function (_a) {
@@ -662,7 +672,7 @@ var Nav = /** @class */ (function () {
                     case 0: return [4 /*yield*/, import('../entry/login')];
                     case 1:
                         lv = _a.sent();
-                        loginView = React.createElement(lv.default, { withBack: withBack, callback: callback });
+                        loginView = React.createElement(lv.default, { withBack: withBack, callback: callback, top: top });
                         if (withBack !== true) {
                             this.nav.clear();
                             this.pop();
@@ -695,7 +705,6 @@ var Nav = /** @class */ (function () {
                         this.local.logoutClear();
                         this.user = undefined; //{} as User;
                         logoutApis();
-                        logoutUqTokens();
                         guest = this.local.guest.get();
                         setCenterToken(0, guest && guest.token);
                         this.ws = undefined;
@@ -709,6 +718,20 @@ var Nav = /** @class */ (function () {
                         _a.sent();
                         _a.label = 4;
                     case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Nav.prototype.changePassword = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var cp;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, import('../entry/changePassword')];
+                    case 1:
+                        cp = _a.sent();
+                        nav.push(React.createElement(cp.ChangePasswordPage, null));
+                        return [2 /*return*/];
                 }
             });
         });
@@ -750,6 +773,12 @@ var Nav = /** @class */ (function () {
     Nav.prototype.pop = function (level) {
         if (level === void 0) { level = 1; }
         this.nav.pop(level);
+    };
+    Nav.prototype.topKey = function () {
+        return this.nav.topKey();
+    };
+    Nav.prototype.popTo = function (key) {
+        this.nav.popTo(key);
     };
     Nav.prototype.clear = function () {
         this.nav.clear();

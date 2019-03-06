@@ -116,7 +116,7 @@ var Host = /** @class */ (function () {
                         for (_i = 0, hostArr_1 = hostArr; _i < hostArr_1.length; _i++) {
                             host_1 = hostArr_1[_i];
                             fetchUrl = this.debugHostUrl(host_1);
-                            promises.push(localCheck(fetchUrl, fetchOptions));
+                            promises.push(localCheck(fetchUrl));
                         }
                         return [4 /*yield*/, Promise.all(promises)];
                     case 1:
@@ -180,6 +180,16 @@ var Host = /** @class */ (function () {
         }
         return url;
     };
+    Host.prototype.localCheck = function (urlDebug) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localCheck(urlDebug)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     return Host;
 }());
 export var host = new Host();
@@ -188,10 +198,10 @@ export var host = new Host();
 // 尽管timeout了，fetch仍然继续，没有cancel
 // 实际上，一秒钟不够。web服务器会自动停。重启的时候，可能会比较长时间。也许两秒甚至更多。
 //const timeout = 2000;
-var timeout = 100;
-function fetchLocalCheck(url, options) {
+var timeout = 200;
+function fetchLocalCheck(url) {
     return new Promise(function (resolve, reject) {
-        fetch(url, options)
+        fetch(url, fetchOptions)
             .then(function (v) {
             v.text().then(resolve).catch(reject);
         })
@@ -200,19 +210,19 @@ function fetchLocalCheck(url, options) {
         setTimeout(reject, timeout, e);
     });
 }
-function localCheck(url, options) {
+function localCheck(url) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    _b.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, fetchLocalCheck(url, options)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fetchLocalCheck(url)];
                 case 1:
-                    _b.sent();
+                    _a.sent();
                     return [2 /*return*/, true];
                 case 2:
-                    _a = _b.sent();
+                    err_1 = _a.sent();
                     return [2 /*return*/, false];
                 case 3: return [2 /*return*/];
             }

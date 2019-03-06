@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import _ from 'lodash';
 import { nav } from '../ui';
 import { uid } from '../uid';
-import { uqTokenApi as uqTokenApi, callCenterapi, CenterAppApi, centerToken } from './uqApi';
+import { uqTokenApi as uqTokenApi, callCenterapi, centerToken, setCenterToken } from './uqApi';
 import { setSubAppWindow } from './wsChannel';
 import { host } from './host';
 var uqTokens = {};
@@ -155,11 +155,13 @@ function hideFrameBack(hash) {
 }
 function initSubWin(message) {
     return __awaiter(this, void 0, void 0, function () {
+        var user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     console.log('initSubWin: set nav.user', message);
-                    nav.user = message; // message.user;
+                    user = nav.user = message;
+                    setCenterToken(user.id, user.token);
                     return [4 /*yield*/, nav.showAppView()];
                 case 1:
                     _a.sent();
@@ -242,26 +244,6 @@ export function appUrl(url, unitId, page, param) {
         }
     }
     return { url: url, hash: u };
-}
-export function loadAppUqs(appOwner, appName) {
-    return __awaiter(this, void 0, void 0, function () {
-        var centerAppApi, unit, ret;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    centerAppApi = new CenterAppApi('tv/', undefined);
-                    unit = meInFrame.unit;
-                    return [4 /*yield*/, centerAppApi.uqs(unit, appOwner, appName)];
-                case 1:
-                    ret = _a.sent();
-                    centerAppApi.checkUqs(unit, appOwner, appName).then(function (v) {
-                        if (v === false)
-                            nav.start();
-                    });
-                    return [2 /*return*/, ret];
-            }
-        });
-    });
 }
 export function appUq(uq, uqOwner, uqName) {
     return __awaiter(this, void 0, void 0, function () {

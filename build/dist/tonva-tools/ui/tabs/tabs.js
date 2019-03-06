@@ -88,6 +88,15 @@ var Tabs = /** @class */ (function (_super) {
         _this.selectedTab.selected = true;
         return _this;
     }
+    Tabs.prototype.showTab = function (tabName) {
+        var tab = this.tabs.find(function (v) { return v.name === tabName; });
+        if (tab === undefined)
+            return;
+        if (this.selectedTab !== undefined)
+            this.selectedTab.selected = false;
+        tab.selected = true;
+        this.selectedTab = tab;
+    };
     Tabs.prototype.render = function () {
         var _this = this;
         return React.createElement("div", { className: "tab" },

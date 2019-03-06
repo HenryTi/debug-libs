@@ -11,12 +11,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -60,39 +54,45 @@ import userApi from './userApi';
 import '../css/va-form.css';
 import { registerRes } from './res';
 import { tonvaTop, getSender } from './tools';
-import { TextWidget } from '../ui/form/widgets';
-import { observable } from 'mobx';
-var AccountInput = /** @class */ (function (_super) {
-    __extends(AccountInput, _super);
-    function AccountInput() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.buttonDisabled = true;
-        _this.onClick = function () {
-            var onButtonClick = _this.context.form.props.onButtonClick;
-            if (onButtonClick === undefined)
-                return;
-            onButtonClick(_this.name, _this.context);
-        };
-        return _this;
+/*
+class AccountInput extends TextWidget {
+    @observable private buttonDisabled: boolean = true;
+    private onClick = () => {
+        let {onButtonClick} = this.context.form.props;
+        if (onButtonClick === undefined) return;
+        onButtonClick(this.name, this.context);
     }
-    AccountInput.prototype.onChange = function (evt) {
+    protected onChange(evt: React.ChangeEvent<any>) {
         this.buttonDisabled = (evt.target.value.trim().length === 0);
-    };
-    AccountInput.prototype.render = function () {
-        var _this = this;
-        return React.createElement(React.Fragment, null,
-            React.createElement("div", { className: "input-group" },
-                React.createElement("input", { ref: function (input) { return _this.input = input; }, className: "form-control", type: this.inputType, defaultValue: this.value, onChange: function (evt) { return _this.onChange(evt); }, placeholder: '\u624B\u673A\u53F7/\u90AE\u7BB1', readOnly: this.readOnly, disabled: this.disabled, onKeyDown: this.onKeyDown, onFocus: function (evt) { return _this.onFocus(evt); }, onBlur: function (evt) { return _this.onBlur(evt); }, maxLength: this.itemSchema.maxLength }),
-                React.createElement("div", { className: "input-group-append" },
-                    React.createElement("button", { className: "btn btn-sm btn-outline-primary", type: "button", disabled: this.buttonDisabled, onClick: this.onClick },
-                        React.createElement("small", null, "\u53D1\u9001\u9A8C\u8BC1\u7801")))),
-            this.renderErrors());
-    };
-    __decorate([
-        observable
-    ], AccountInput.prototype, "buttonDisabled", void 0);
-    return AccountInput;
-}(TextWidget));
+    }
+    render() {
+        return <>
+            <div className="input-group">
+                <input ref={input=>this.input = input}
+                            className="form-control"
+                            type={this.inputType}
+                            defaultValue={this.value}
+                            onChange={(evt: React.ChangeEvent<any>) => this.onChange(evt)}
+                            placeholder='手机号/邮箱'
+                            readOnly={this.readOnly}
+                            disabled={this.disabled}
+                            onKeyDown = {this.onKeyDown}
+                            onFocus = {(evt: React.FocusEvent<any>) => this.onFocus(evt)}
+                            onBlur={(evt: React.FocusEvent<any>) => this.onBlur(evt)}
+                            maxLength={(this.itemSchema as StringSchema).maxLength} />
+                <div className="input-group-append">
+                    <button className="btn btn-sm btn-outline-primary"
+                        type="button" disabled={this.buttonDisabled}
+                        onClick={this.onClick}>
+                        <small>发送验证码</small>
+                    </button>
+                </div>
+            </div>
+            {this.renderErrors()}
+        </>;
+    }
+}
+*/
 var RegisterController = /** @class */ (function (_super) {
     __extends(RegisterController, _super);
     function RegisterController() {

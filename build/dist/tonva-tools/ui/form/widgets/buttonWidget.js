@@ -85,14 +85,14 @@ var ButtonWidget = /** @class */ (function (_super) {
         }); };
         _this.observerRender = observer(function () {
             var _a = _this.itemSchema, name = _a.name, type = _a.type;
-            var Templet, cn, label;
+            var Templet, cn, caption;
             if (_this.ui !== undefined) {
                 var widgetType = _this.ui.widget;
                 if (widgetType !== 'button')
                     return Unknown(type, widgetType, ['button']);
                 Templet = _this.ui.Templet;
                 cn = _this.ui.className;
-                label = _this.ui.label;
+                caption = _this.ui.label;
             }
             var _b = _this.context, form = _b.form, hasError = _b.hasError;
             var context = _this.context;
@@ -105,7 +105,7 @@ var ButtonWidget = /** @class */ (function (_super) {
             else if (Templet !== undefined)
                 content = Templet;
             else
-                content = label;
+                content = caption;
             var button = React.createElement("button", { className: cn, type: "button", disabled: disabled, onClick: _this.onClick }, content || name);
             if (context.inNode === true)
                 return React.createElement(React.Fragment, null,
@@ -117,16 +117,13 @@ var ButtonWidget = /** @class */ (function (_super) {
         });
         return _this;
     }
+    Object.defineProperty(ButtonWidget.prototype, "label", {
+        get: function () { return null; },
+        enumerable: true,
+        configurable: true
+    });
     ButtonWidget.prototype.render = function () {
         return React.createElement(this.observerRender, null);
-    };
-    ButtonWidget.prototype.renderContainer = function () {
-        if (this.visible === false)
-            return null;
-        var _a = this.context, form = _a.form, inNode = _a.inNode;
-        if (inNode === true)
-            return this.render();
-        return form.FieldContainer(null, this.render());
     };
     return ButtonWidget;
 }(Widget));

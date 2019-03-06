@@ -12,11 +12,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import * as React from 'react';
-import * as className from 'classnames';
-var imgStyle = {
-    width: '4rem',
-    height: '4rem',
-};
+import classNames from 'classnames';
+import { Image } from 'tonva-tools';
 var Media = /** @class */ (function (_super) {
     __extends(Media, _super);
     function Media() {
@@ -29,12 +26,9 @@ var Media = /** @class */ (function (_super) {
             disp = React.createElement("div", null, discription);
         else
             disp = discription;
-        var img = icon;
-        if (typeof icon === 'string')
-            img = React.createElement("img", { className: "d-flex mr-3", src: icon, alt: "img", style: imgStyle });
-        var cn = className('media', px === undefined ? 'px-0' : 'px-' + px, py === undefined ? 'py-2' : 'py-' + py);
+        var cn = classNames('media', px === undefined ? 'px-0' : 'px-' + px, py === undefined ? 'py-2' : 'py-' + py);
         return React.createElement("div", { className: cn },
-            img,
+            React.createElement(Image, { className: "mr-3 w-4c h-4c", src: icon }),
             React.createElement("div", { className: "media-body" },
                 React.createElement("h5", { className: "mt-0" }, main),
                 disp));

@@ -51,15 +51,18 @@ var CheckBoxWidget = /** @class */ (function (_super) {
     CheckBoxWidget.prototype.setDisabled = function (value) { this.input.disabled = this.disabled = value; };
     CheckBoxWidget.prototype.render = function () {
         var _this = this;
-        var cn = classNames(this.className, 'form-check-inline');
+        var cn = classNames(this.className, 'form-check-inline p-0');
         var input = React.createElement("input", { ref: function (input) { return _this.input = input; }, className: 'align-self-center', type: "checkbox", defaultChecked: this.defaultValue, onChange: this.onInputChange, onClick: this.onClick });
-        return this.context.inNode ?
-            React.createElement("label", { className: cn },
+        if (this.context.inNode === true) {
+            return React.createElement("label", { className: cn },
                 input,
                 " ",
-                (this.ui && this.ui.label) || this.name)
-            :
-                React.createElement("div", { className: cn }, input);
+                (this.ui && this.ui.label) || this.name);
+        }
+        else {
+            return React.createElement("div", { className: cn },
+                React.createElement("label", { className: "w-100 h-100 mb-0 d-flex justify-content-center" }, input));
+        }
     };
     return CheckBoxWidget;
 }(Widget));

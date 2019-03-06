@@ -8,6 +8,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import { RuleRequired, RuleCustom } from '../rules';
 import { computed, observable } from 'mobx';
+import { observer } from 'mobx-react';
 var Widget = /** @class */ (function () {
     function Widget(context, itemSchema, fieldProps, children) {
         var _this = this;
@@ -15,30 +16,23 @@ var Widget = /** @class */ (function () {
         this.contextErrors = [];
         this.onInputChange = function (evt) {
             _this.changeValue(evt.target.value, true);
-            /*
-            let prev = this.value;
-            let onChanging: ChangingHandler;
-            let onChanged: ChangedHandler;
-            if (this.ui !== undefined) {
-                onChanging = this.ui.onChanging;
-                onChanged = this.ui.onChanged;
-            }
-            let allowChange = true;
-            if (onChanging !== undefined) {
-                this.isChanging = true;
-                allowChange = onChanging(this.context, this.value, prev);
-                this.isChanging = false;
-            }
-            if (allowChange === true) {
-                this.setDataValue(evt.currentTarget.value);
-                if (onChanged !== undefined) {
-                    this.isChanging = true;
-                    onChanged(this.context, this.value, prev);
-                    this.isChanging = false;
-                }
-            }
-            */
         };
+        this.container = observer(function () {
+            if (_this.visible === false)
+                return null;
+            var _a = _this.context, form = _a.form, inNode = _a.inNode;
+            if (inNode === true)
+                return _this.render();
+            var label = _this.label;
+            if (_this.itemSchema.required === true && form.props.requiredFlag !== false) {
+                if (label !== null)
+                    label = React.createElement(React.Fragment, null,
+                        label,
+                        "\u00A0",
+                        React.createElement("span", { className: "text-danger" }, "*"));
+            }
+            return form.FieldContainer(label, _this.render());
+        });
         this.context = context;
         var name = itemSchema.name;
         this.name = name;
@@ -191,31 +185,24 @@ var Widget = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    Widget.prototype.renderContainer = function () {
-        if (this.visible === false)
-            return null;
-        var _a = this.context, form = _a.form, inNode = _a.inNode;
-        if (inNode === true)
-            return this.render();
-        var label;
-        if (this.ui === undefined) {
-            label = this.name;
-        }
-        else {
-            var uiLabel = this.ui.label;
-            if (uiLabel === null)
-                label = null;
-            label = uiLabel || this.name;
-        }
-        if (this.itemSchema.required === true && form.props.requiredFlag !== false) {
-            if (label !== null)
-                label = React.createElement(React.Fragment, null,
-                    label,
-                    "\u00A0",
-                    React.createElement("span", { className: "text-danger" }, "*"));
-        }
-        return form.FieldContainer(label, this.render());
-    };
+    Object.defineProperty(Widget.prototype, "label", {
+        get: function () {
+            var label;
+            if (this.ui === undefined) {
+                label = this.name;
+            }
+            else {
+                var uiLabel = this.ui.label;
+                if (uiLabel === null)
+                    label = null;
+                else
+                    label = uiLabel || this.name;
+            }
+            return label;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Widget.prototype.renderTemplet = function () {
         if (this.children !== undefined) {
             return React.createElement(React.Fragment, null, this.children);

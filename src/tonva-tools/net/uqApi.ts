@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import {HttpChannel} from './httpChannel';
 import {HttpChannelUI, HttpChannelNavUI} from './httpChannelUI';
-import {appUq} from './appBridge';
+import {appUq, meInFrame, logoutUqTokens} from './appBridge';
 import {ApiBase} from './apiBase';
 import { host } from './host';
+import { nav } from '../ui';
 
 let channelUIs:{[name:string]: HttpChannel} = {};
 let channelNoUIs:{[name:string]: HttpChannel} = {};
@@ -12,6 +13,7 @@ export function logoutApis() {
     channelUIs = {};
     channelNoUIs = {};
     logoutUnitxApis();
+    logoutUqTokens();
 }
 
 interface UqLocal {
@@ -98,9 +100,10 @@ class CacheUqLocals {
         let isMatch = _.isMatch(value, ret);
         if (isMatch === false) {
             this.saveLocal(un, ret);
+            return false;
         }
-        return isMatch;
-
+        uq.isNet = true;
+        return true;
     }
 }
 
@@ -348,6 +351,7 @@ export let centerToken:string|undefined = undefined;
 
 let loginedUserId:number = 0;
 export function setCenterToken(userId:number, t?:string) {
+    loginedUserId = userId;
     centerToken = t;
     console.log('setCenterToken %s', t);
     centerChannel = undefined;
@@ -407,7 +411,7 @@ export class UqTokenApi extends CenterApi {
             if (uq !== undefined) {
                 let {tick, value} = uq;
                 if ((nowTick - tick) < 24*3600*1000) {
-                    return value;
+                    return _.clone(value);
                 }
             }
             let ret = await this.get('app-uq', params);
@@ -416,7 +420,7 @@ export class UqTokenApi extends CenterApi {
                 value: ret,
             }
             localStorage.setItem(uqTokens, JSON.stringify(this.local));
-            return ret;
+            return _.clone(ret);
         }
         catch (err) {
             this.local = undefined;
@@ -452,11 +456,13 @@ export interface AppUq {
     token: string;
 }
 
+const appUqs = 'appUqs';
+
 export class CenterAppApi extends CenterApi {
     private cachedUqs: any;
     async uqs(unit:number, appOwner:string, appName:string):Promise<App> {
         let ret:any;
-        let ls = localStorage.getItem('appUqs');
+        let ls = localStorage.getItem(appUqs);
         if (ls !== null) {
             let rLs = JSON.parse(ls);
             let {unit:rUnit, appOwner:rAppOwner, appName:rAppName, value} = rLs;
@@ -470,7 +476,7 @@ export class CenterAppApi extends CenterApi {
                 appName:appName, 
                 value: ret,
             }
-            localStorage.setItem('appUqs', JSON.stringify(obj));
+            localStorage.setItem(appUqs, JSON.stringify(obj));
         }
         return this.cachedUqs = _.cloneDeep(ret);
     }
@@ -484,4 +490,20 @@ export class CenterAppApi extends CenterApi {
     async unitxUq(unit:number):Promise<AppUq> {
         return await this.get('tie/unitx-uq', {unit:unit});
     }
+    async changePassword(param: {orgPassword:string, newPassword:string}) {
+        return await this.post('tie/reset-password', param);
+    }
+}
+
+export async function loadAppUqs(appOwner:string, appName): Promise<App> {
+    let centerAppApi = new CenterAppApi('tv/', undefined);
+    let unit = meInFrame.unit;
+    let ret = await centerAppApi.uqs(unit, appOwner, appName);
+    centerAppApi.checkUqs(unit, appOwner, appName).then(v => {
+        if (v === false) {
+            localStorage.removeItem(appUqs);
+            nav.start();
+        }
+    });
+    return ret;
 }

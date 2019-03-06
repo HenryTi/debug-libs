@@ -137,8 +137,9 @@ var CApp = /** @class */ (function (_super) {
                             for (var _i = 0, checks_1 = checks; _i < checks_1.length; _i++) {
                                 var c = checks_1[_i];
                                 if (c === false) {
-                                    nav.start();
-                                    return;
+                                    //debugger;
+                                    //nav.start();
+                                    //return;
                                 }
                             }
                         });
@@ -310,6 +311,8 @@ var CApp = /** @class */ (function (_super) {
     };
     CApp.prototype.showUnsupport = function () {
         this.clearPrevPages();
+        var user = nav.user;
+        var userName = user ? user.name : '[未登录]';
         this.openPage(React.createElement(Page, { header: "APP\u65E0\u6CD5\u8FD0\u884C", logout: true },
             React.createElement("div", { className: "m-3 text-danger container" },
                 React.createElement("div", { className: "form-group row" },
@@ -318,7 +321,7 @@ var CApp = /** @class */ (function (_super) {
                     React.createElement("div", { className: "col" }, "\u7528\u6237\u4E0D\u652F\u6301APP")),
                 React.createElement("div", { className: "form-group row" },
                     React.createElement("div", { className: "col-2" }, "\u7528\u6237: "),
-                    React.createElement("div", { className: "col" }, "" + nav.user.name)),
+                    React.createElement("div", { className: "col" }, userName)),
                 React.createElement("div", { className: "form-group row" },
                     React.createElement("div", { className: "col-2" }, "App:"),
                     React.createElement("div", { className: "col" }, this.appOwner + "/" + this.appName)))));

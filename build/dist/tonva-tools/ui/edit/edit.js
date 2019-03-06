@@ -62,7 +62,7 @@ var Edit = /** @class */ (function (_super) {
     function Edit(props) {
         var _this = _super.call(this, props) || this;
         _this.defaultSepClassName = "border-top edit-sep-light-gray";
-        _this.defaultRowContainerClassName = "px-3 py-2 cursor-pointer bg-white";
+        _this.defaultRowContainerClassName = "d-flex px-3 py-2 cursor-pointer bg-white align-items-center";
         _this.rowClick = function (itemSchema, uiItem, label, value) { return __awaiter(_this, void 0, void 0, function () {
             var _a, onItemChanged, onItemClick, changeValue, itemEdit, err_1;
             return __generator(this, function (_b) {
@@ -132,7 +132,7 @@ var Edit = /** @class */ (function (_super) {
         var value = this.props.data[name];
         switch (type) {
             default:
-                divValue = React.createElement("b", null, value);
+                divValue = value ? React.createElement("b", null, value) : React.createElement("small", { className: "text-muted" }, "(\u65E0)");
                 break;
             case 'image':
                 divValue = React.createElement(Image, { className: "w-4c h-4c", src: value });
@@ -144,11 +144,10 @@ var Edit = /** @class */ (function (_super) {
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             }); }); } },
-            React.createElement("div", { className: "row align-items-center" },
-                React.createElement("div", { className: "col-sm-2" }, label),
-                React.createElement("div", { className: "col-sm-9 text-right" }, divValue),
-                React.createElement("div", { className: "col-sm-1 text-right" },
-                    React.createElement("i", { className: "fa fa-chevron-right" }))));
+            React.createElement("div", { className: "w-6c" }, label),
+            React.createElement("div", { className: "flex-fill d-flex justify-content-end" }, divValue),
+            React.createElement("div", { className: "w-2c text-right" },
+                React.createElement("i", { className: "fa fa-chevron-right" })));
     };
     Edit = __decorate([
         observer

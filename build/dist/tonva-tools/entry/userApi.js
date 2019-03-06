@@ -130,6 +130,18 @@ var UserApi = /** @class */ (function (_super) {
             });
         });
     };
+    UserApi.prototype.userSetProp = function (prop, value) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.post('tie/user-set-prop', { prop: prop, value: value })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UserApi;
 }(CenterApi));
 export { UserApi };

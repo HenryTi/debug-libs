@@ -49,15 +49,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import _ from 'lodash';
 import { HttpChannel } from './httpChannel';
 import { HttpChannelNavUI } from './httpChannelUI';
-import { appUq } from './appBridge';
+import { appUq, meInFrame, logoutUqTokens } from './appBridge';
 import { ApiBase } from './apiBase';
 import { host } from './host';
+import { nav } from '../ui';
 var channelUIs = {};
 var channelNoUIs = {};
 export function logoutApis() {
     channelUIs = {};
     channelNoUIs = {};
     logoutUnitxApis();
+    logoutUqTokens();
 }
 var uqLocalEntities = 'uqLocalEntities';
 var CacheUqLocals = /** @class */ (function () {
@@ -148,8 +150,10 @@ var CacheUqLocals = /** @class */ (function () {
                         isMatch = _.isMatch(value, ret);
                         if (isMatch === false) {
                             this.saveLocal(un, ret);
+                            return [2 /*return*/, false];
                         }
-                        return [2 /*return*/, isMatch];
+                        uq.isNet = true;
+                        return [2 /*return*/, true];
                 }
             });
         });
@@ -617,6 +621,7 @@ export function setCenterUrl(url) {
 export var centerToken = undefined;
 var loginedUserId = 0;
 export function setCenterToken(userId, t) {
+    loginedUserId = userId;
     centerToken = t;
     console.log('setCenterToken %s', t);
     centerChannel = undefined;
@@ -689,7 +694,7 @@ var UqTokenApi = /** @class */ (function (_super) {
                         if (uq !== undefined) {
                             tick = uq.tick, value = uq.value;
                             if ((nowTick - tick) < 24 * 3600 * 1000) {
-                                return [2 /*return*/, value];
+                                return [2 /*return*/, _.clone(value)];
                             }
                         }
                         return [4 /*yield*/, this.get('app-uq', params)];
@@ -700,7 +705,7 @@ var UqTokenApi = /** @class */ (function (_super) {
                             value: ret,
                         };
                         localStorage.setItem(uqTokens, JSON.stringify(this.local));
-                        return [2 /*return*/, ret];
+                        return [2 /*return*/, _.clone(ret)];
                     case 2:
                         err_2 = _b.sent();
                         this.local = undefined;
@@ -727,6 +732,7 @@ var CallCenterApi = /** @class */ (function (_super) {
 }(CenterApi));
 export { CallCenterApi };
 export var callCenterapi = new CallCenterApi('', undefined);
+var appUqs = 'appUqs';
 var CenterAppApi = /** @class */ (function (_super) {
     __extends(CenterAppApi, _super);
     function CenterAppApi() {
@@ -738,7 +744,7 @@ var CenterAppApi = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        ls = localStorage.getItem('appUqs');
+                        ls = localStorage.getItem(appUqs);
                         if (ls !== null) {
                             rLs = JSON.parse(ls);
                             rUnit = rLs.unit, rAppOwner = rLs.appOwner, rAppName = rLs.appName, value = rLs.value;
@@ -755,7 +761,7 @@ var CenterAppApi = /** @class */ (function (_super) {
                             appName: appName,
                             value: ret,
                         };
-                        localStorage.setItem('appUqs', JSON.stringify(obj));
+                        localStorage.setItem(appUqs, JSON.stringify(obj));
                         _a.label = 2;
                     case 2: return [2 /*return*/, this.cachedUqs = _.cloneDeep(ret)];
                 }
@@ -795,7 +801,39 @@ var CenterAppApi = /** @class */ (function (_super) {
             });
         });
     };
+    CenterAppApi.prototype.changePassword = function (param) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.post('tie/reset-password', param)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     return CenterAppApi;
 }(CenterApi));
 export { CenterAppApi };
+export function loadAppUqs(appOwner, appName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var centerAppApi, unit, ret;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    centerAppApi = new CenterAppApi('tv/', undefined);
+                    unit = meInFrame.unit;
+                    return [4 /*yield*/, centerAppApi.uqs(unit, appOwner, appName)];
+                case 1:
+                    ret = _a.sent();
+                    centerAppApi.checkUqs(unit, appOwner, appName).then(function (v) {
+                        if (v === false) {
+                            localStorage.removeItem(appUqs);
+                            nav.start();
+                        }
+                    });
+                    return [2 /*return*/, ret];
+            }
+        });
+    });
+}
 //# sourceMappingURL=uqApi.js.map
