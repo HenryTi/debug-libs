@@ -68,9 +68,9 @@ import { observable } from 'mobx';
 import { Page } from './page';
 import { netToken } from '../net/netToken';
 import FetchErrorView from './fetchErrorView';
-import { appUrl, setMeInFrame } from '../net/appBridge';
+import { appUrl, setAppInFrame, getExHash, getExHashPos } from '../net/appBridge';
 import { LocalData } from '../local';
-import { guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, meInFrame, isDevelopment, host } from '../net';
+import { guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, isDevelopment, host } from '../net';
 import { wsBridge } from '../net/wsChannel';
 import { resOptions } from './res';
 import { Loading } from './loading';
@@ -335,7 +335,7 @@ var NavView = /** @class */ (function (_super) {
         var len = this.stack.length;
         while (this.stack.length > 0)
             this.popAndDispose();
-        this.refresh();
+        //this.refresh();
         if (len > 1) {
             //window.removeEventListener('popstate', this.navBack);
             //window.history.back(len-1);
@@ -500,7 +500,7 @@ var Nav = /** @class */ (function () {
             });
         });
     };
-    Nav.prototype.loadUnit = function () {
+    Nav.prototype.loadPredefinedUnit = function () {
         return __awaiter(this, void 0, void 0, function () {
             var unitName, unit, unitId;
             return __generator(this, function (_a) {
@@ -537,13 +537,19 @@ var Nav = /** @class */ (function () {
     };
     Nav.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, ws, resHost, unit, guest, hash, mif, user, notLogined, err_2;
+            var hash, pos, url, ws, resHost, guest, exHash, appInFrame_1, unit, user, notLogined, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 11, 12, 13]);
+                        hash = document.location.hash;
+                        if (hash !== undefined && hash.length > 0) {
+                            pos = getExHashPos();
+                            if (pos < 0)
+                                pos = undefined;
+                            this.hashParam = hash.substring(1, pos);
+                        }
                         nav.clear();
-                        //nav.push(<Page header={false}><Loading /></Page>);
                         this.startWait();
                         return [4 /*yield*/, host.start()];
                     case 1:
@@ -553,36 +559,34 @@ var Nav = /** @class */ (function () {
                         this.resUrl = 'http://' + resHost + '/res/';
                         this.wsHost = ws;
                         setCenterUrl(url);
-                        return [4 /*yield*/, this.loadUnit()];
-                    case 2:
-                        unit = _a.sent();
-                        meInFrame.unit = unit;
                         guest = this.local.guest.get();
-                        if (!(guest === undefined)) return [3 /*break*/, 4];
+                        if (!(guest === undefined)) return [3 /*break*/, 3];
                         return [4 /*yield*/, guestApi.guest()];
-                    case 3:
+                    case 2:
                         guest = _a.sent();
-                        _a.label = 4;
-                    case 4:
+                        _a.label = 3;
+                    case 3:
                         nav.setGuest(guest);
-                        hash = document.location.hash;
-                        // document.title = document.location.origin;
-                        console.log("url=%s hash=%s", document.location.origin, hash);
-                        this.isInFrame = hash !== undefined && hash !== '' && hash.startsWith('#tv');
-                        if (this.isInFrame === true) {
-                            mif = setMeInFrame(hash);
-                            if (mif !== undefined) {
+                        exHash = getExHash();
+                        appInFrame_1 = setAppInFrame(exHash);
+                        if (exHash !== undefined && window !== window.parent) {
+                            // is in frame
+                            if (appInFrame_1 !== undefined) {
                                 this.ws = wsBridge;
                                 console.log('this.ws = wsBridge in sub frame');
                                 //nav.user = {id:0} as User;
                                 if (self !== window.parent) {
-                                    window.parent.postMessage({ type: 'sub-frame-started', hash: mif.hash }, '*');
+                                    window.parent.postMessage({ type: 'sub-frame-started', hash: appInFrame_1.hash }, '*');
                                 }
                                 // 下面这一句，已经移到 appBridge.ts 里面的 initSubWin，也就是响应从main frame获得user之后开始。
                                 //await this.showAppView();
                                 return [2 /*return*/];
                             }
                         }
+                        return [4 /*yield*/, this.loadPredefinedUnit()];
+                    case 4:
+                        unit = _a.sent();
+                        appInFrame_1.predefinedUnit = unit;
                         user = this.local.user.get();
                         if (!(user === undefined)) return [3 /*break*/, 9];
                         notLogined = this.nav.props.notLogined;

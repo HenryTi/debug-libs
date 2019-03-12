@@ -221,7 +221,7 @@ var Controller = /** @class */ (function () {
             return;
         var resolve = this._resolve_$.pop();
         if (resolve === undefined) {
-            alert('the Coordinator call already returned, or not called');
+            alert('the Controller call already returned, or not called');
             return;
         }
         resolve(value);
@@ -336,8 +336,8 @@ var View = /** @class */ (function () {
 export { View };
 var VPage = /** @class */ (function (_super) {
     __extends(VPage, _super);
-    function VPage(coordinator) {
-        return _super.call(this, coordinator) || this;
+    function VPage() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     VPage.prototype.render = function (param) { return null; };
     return VPage;

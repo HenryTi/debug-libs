@@ -17,10 +17,6 @@ var UpdownWidget = /** @class */ (function (_super) {
     function UpdownWidget() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.inputType = 'number';
-        _this.onKeyDown = function (evt) {
-            var key = evt.keyCode;
-            event.returnValue = _this.isValidKey(key);
-        };
         return _this;
     }
     UpdownWidget.prototype.isValidKey = function (key) {
@@ -28,6 +24,10 @@ var UpdownWidget = /** @class */ (function (_super) {
             || key >= 48 && key <= 57
             || key >= 96 && key <= 105
             || key === 109 || key === 189;
+    };
+    UpdownWidget.prototype.internalOnKeyDown = function (evt) {
+        var key = evt.keyCode;
+        event.returnValue = this.isValidKey(key);
     };
     return UpdownWidget;
 }(NumberWidget));

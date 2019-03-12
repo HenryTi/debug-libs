@@ -118,7 +118,7 @@ var VForm = /** @class */ (function () {
             var item = this.formItems[i];
             if (typeof item !== 'function')
                 continue;
-            values[i] = item.call(values);
+            values[i] = item.call(this, values);
         }
     };
     VForm.prototype.submit = function () {

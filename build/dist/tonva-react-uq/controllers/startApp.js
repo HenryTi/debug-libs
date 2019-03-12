@@ -54,14 +54,14 @@ function convertUIKeyToLowercase(obj) {
     }
 }
 // const appName = 'JKDev/jkOrder';
-export function startApp(appName, ui) {
+export function startApp(ui) {
     return __awaiter(this, void 0, void 0, function () {
         var cApp;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     convertUIKeyToLowercase(ui);
-                    cApp = new (ui && ui.CApp || CApp)(appName, ui || { uqs: {} });
+                    cApp = new (ui && ui.CApp || CApp)(ui);
                     return [4 /*yield*/, cApp.start()];
                 case 1:
                     _a.sent();

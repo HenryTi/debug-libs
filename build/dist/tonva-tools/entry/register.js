@@ -264,9 +264,6 @@ var AccountPage = /** @class */ (function (_super) {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.schema = [
             { name: 'user', type: 'string', required: true, maxLength: 100 },
-            //{name: 'verify', type: 'string', required: true, maxLength: 6} as StringSchema,
-            //{name: 'pwd', type: 'string', required: true, maxLength: 100} as StringSchema,
-            //{name: 'rePwd', type: 'string', required: true, maxLength: 100} as StringSchema,
             { name: 'verify', type: 'submit' },
         ];
         _this.res = resLang(registerRes);
@@ -275,7 +272,7 @@ var AccountPage = /** @class */ (function (_super) {
                 React.createElement("div", { className: "w-max-20c my-5 py-5", style: { marginLeft: 'auto', marginRight: 'auto' } },
                     tonvaTop,
                     React.createElement("div", { className: "h-3c" }),
-                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, requiredFlag: false })));
+                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, onEnter: _this.onEnter, requiredFlag: false })));
         };
         _this.onSubmit = function (name, context) { return __awaiter(_this, void 0, void 0, function () {
             var user, value, sender, type, ret;
@@ -305,6 +302,17 @@ var AccountPage = /** @class */ (function (_super) {
                         if (ret !== undefined)
                             context.setError(user, ret);
                         return [2 /*return*/];
+                }
+            });
+        }); };
+        _this.onEnter = function (name, context) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(name === 'user')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.onSubmit('verify', context)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/];
                 }
             });
         }); };
@@ -375,6 +383,17 @@ var VerifyPage = /** @class */ (function (_super) {
                 }
             });
         }); };
+        _this.onEnter = function (name, context) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(name === 'verify')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.onSubmit('submit', context)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/];
+                }
+            });
+        }); };
         _this.page = function () {
             var typeText, extra;
             switch (_this.controller.type) {
@@ -398,7 +417,7 @@ var VerifyPage = /** @class */ (function (_super) {
                         React.createElement("b", null, _this.controller.account)),
                     extra,
                     React.createElement("div", { className: "h-1c" }),
-                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, requiredFlag: false })));
+                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, onEnter: _this.onEnter, requiredFlag: false })));
         };
         return _this;
     }
@@ -439,6 +458,17 @@ var PasswordPage = /** @class */ (function (_super) {
                 }
             });
         }); };
+        _this.onEnter = function (name, context) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(name === 'rePwd')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.onSubmit('submit', context)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/];
+                }
+            });
+        }); };
         _this.page = function () {
             return React.createElement(Page, { header: _this.controller.passwordPageCaption },
                 React.createElement("div", { className: "w-max-20c my-5 py-5", style: { marginLeft: 'auto', marginRight: 'auto' } },
@@ -447,7 +477,7 @@ var PasswordPage = /** @class */ (function (_super) {
                     React.createElement("div", { className: "py-2 px-3 my-2 text-primary bg-light" },
                         React.createElement("b", null, _this.controller.account)),
                     React.createElement("div", { className: "h-1c" }),
-                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, requiredFlag: false })));
+                    React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, onEnter: _this.onEnter, requiredFlag: false })));
         };
         return _this;
     }
@@ -499,68 +529,4 @@ var RegSuccess = /** @class */ (function (_super) {
     };
     return RegSuccess;
 }(VPage));
-/*
-export default class Register extends React.Component {
-    async onSubmit(name:string, context:Context):Promise<string> {
-        let values = context.form.data;
-        let {user, pwd, rePwd, country, mobile, email} = values;
-        if (pwd !== rePwd) {
-            context.setValue('pwd', '');
-            context.setValue('rePwd', '');
-            return '密码错误，请重新输入密码！';
-        }
-        let ret = await userApi.register({
-            nick: undefined,
-            user: user,
-            pwd: pwd,
-            country: undefined,
-            mobile: undefined,
-            email: undefined,
-        });
-        let msg:any;
-        switch (ret) {
-            default: throw 'unknown return';
-            case 0:
-                nav.clear();
-                nav.show(<RegSuccess user={user} pwd={pwd} />);
-                return;
-            case 1:
-                msg = '用户名 ' + user;
-                break;
-            case 2:
-                msg = '手机号 +' + country + ' ' + mobile;
-                break;
-            case 3:
-                msg = '电子邮件 ' + email;
-                break;
-        }
-        return msg + ' 已经被注册过了';
-    }
-    click() {
-        nav.replace(<LoginView />);
-    }
-
-    render() {
-        return <Page header='账号注册'>
-            <div style={{
-                maxWidth:'25em',
-                margin: '3em auto',
-                padding: '0 3em',
-            }}>
-                <div className='container' style={{display:'flex', position:'relative'}}>
-                    <img className='App-logo' src={logo} style={{height:'60px', position:'absolute'}}/>
-                    <span style={{flex:1,
-                        fontSize: 'x-large',
-                        alignSelf: 'center',
-                        textAlign: 'center',
-                        margin: '10px',
-                    }}>同花</span>
-                </div>
-                <div style={{height:'20px'}} />
-                <Form schema={schema} uiSchema={uiSchema} onButtonClick={this.onSubmit} requiredFlag={false} />
-            </div>
-        </Page>;
-    }
-}
-*/ 
 //# sourceMappingURL=register.js.map

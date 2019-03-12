@@ -16,7 +16,7 @@ export class TabController {
 
     async start() {
         nav.logMark();
-        this.cApp = new CApp(tonvaApp);
+        this.cApp = new CApp({appName: tonvaApp, uqs:{}});
         await this.cApp.load();
         nav.logStep('await this.cApp.load()');
         this.cUq = this.cApp.getCUq('JKDev/jkOrder');

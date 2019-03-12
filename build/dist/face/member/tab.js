@@ -75,7 +75,7 @@ var TabController = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         nav.logMark();
-                        this.cApp = new CApp(tonvaApp);
+                        this.cApp = new CApp({ appName: tonvaApp, uqs: {} });
                         return [4 /*yield*/, this.cApp.load()];
                     case 1:
                         _a.sent();

@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import _ from 'lodash';
 import { HttpChannel } from './httpChannel';
 import { HttpChannelNavUI } from './httpChannelUI';
-import { appUq, meInFrame, logoutUqTokens } from './appBridge';
+import { appUq, logoutUqTokens } from './appBridge';
 import { ApiBase } from './apiBase';
 import { host } from './host';
 import { nav } from '../ui';
@@ -738,25 +738,24 @@ var CenterAppApi = /** @class */ (function (_super) {
     function CenterAppApi() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    CenterAppApi.prototype.uqs = function (unit, appOwner, appName) {
+    CenterAppApi.prototype.uqs = function (appOwner, appName) {
         return __awaiter(this, void 0, void 0, function () {
-            var ret, ls, rLs, rUnit, rAppOwner, rAppName, value, obj;
+            var ret, ls, rLs, rAppOwner, rAppName, value, obj;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         ls = localStorage.getItem(appUqs);
                         if (ls !== null) {
                             rLs = JSON.parse(ls);
-                            rUnit = rLs.unit, rAppOwner = rLs.appOwner, rAppName = rLs.appName, value = rLs.value;
-                            if (unit === rUnit && appOwner === rAppOwner && appName === rAppName)
+                            rAppOwner = rLs.appOwner, rAppName = rLs.appName, value = rLs.value;
+                            if (appOwner === rAppOwner && appName === rAppName)
                                 ret = value;
                         }
                         if (!(ret === undefined)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.uqsPure(unit, appOwner, appName)];
+                        return [4 /*yield*/, this.uqsPure(appOwner, appName)];
                     case 1:
                         ret = _a.sent();
                         obj = {
-                            unit: unit,
                             appOwner: appOwner,
                             appName: appName,
                             value: ret,
@@ -768,25 +767,36 @@ var CenterAppApi = /** @class */ (function (_super) {
             });
         });
     };
-    CenterAppApi.prototype.uqsPure = function (unit, appOwner, appName) {
+    CenterAppApi.prototype.uqsPure = function (appOwner, appName) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.get('tie/app-uqs', { unit: unit, appOwner: appOwner, appName: appName })];
+                    case 0: return [4 /*yield*/, this.get('tie/app-uqs', { appOwner: appOwner, appName: appName })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
-    CenterAppApi.prototype.checkUqs = function (unit, appOwner, appName) {
+    CenterAppApi.prototype.checkUqs = function (appOwner, appName) {
         return __awaiter(this, void 0, void 0, function () {
-            var ret;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.uqsPure(unit, appOwner, appName)];
+            var ret, _a, cachedId, cachedUqs, retId, retUqs, len, i;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.uqsPure(appOwner, appName)];
                     case 1:
-                        ret = _a.sent();
-                        return [2 /*return*/, _.isMatch(this.cachedUqs, ret)];
+                        ret = _b.sent();
+                        _a = this.cachedUqs, cachedId = _a.id, cachedUqs = _a.uqs;
+                        retId = ret.id, retUqs = ret.uqs;
+                        if (cachedId !== retId)
+                            return [2 /*return*/, false];
+                        if (cachedUqs.length !== retUqs.length)
+                            return [2 /*return*/, false];
+                        len = cachedUqs.length;
+                        for (i = 0; i < len; i++) {
+                            if (_.isMatch(cachedUqs[i], retUqs[i]) === false)
+                                return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/, true];
                 }
             });
         });
@@ -816,16 +826,15 @@ var CenterAppApi = /** @class */ (function (_super) {
 export { CenterAppApi };
 export function loadAppUqs(appOwner, appName) {
     return __awaiter(this, void 0, void 0, function () {
-        var centerAppApi, unit, ret;
+        var centerAppApi, ret;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     centerAppApi = new CenterAppApi('tv/', undefined);
-                    unit = meInFrame.unit;
-                    return [4 /*yield*/, centerAppApi.uqs(unit, appOwner, appName)];
+                    return [4 /*yield*/, centerAppApi.uqs(appOwner, appName)];
                 case 1:
                     ret = _a.sent();
-                    centerAppApi.checkUqs(unit, appOwner, appName).then(function (v) {
+                    centerAppApi.checkUqs(appOwner, appName).then(function (v) {
                         if (v === false) {
                             localStorage.removeItem(appUqs);
                             nav.start();

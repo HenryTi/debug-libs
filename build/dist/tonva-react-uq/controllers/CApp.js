@@ -47,13 +47,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import * as React from 'react';
-import { Page, loadAppUqs, nav, meInFrame, Controller, VPage, resLang } from 'tonva-tools';
+import _ from 'lodash';
+import { Page, loadAppUqs, nav, appInFrame, Controller, VPage, resLang, getExHash, isDevelopment } from 'tonva-tools';
 import { List, LMR, FA } from 'tonva-react-form';
 import { CUq } from './uq';
 import { centerApi } from '../centerApi';
 var CApp = /** @class */ (function (_super) {
     __extends(CApp, _super);
-    function CApp(tonvaApp, ui) {
+    function CApp(ui) {
         var _this = _super.call(this, resLang(ui && ui.res)) || this;
         _this.cImportUqs = {};
         _this.cUqCollection = {};
@@ -66,7 +67,7 @@ var CApp = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        meInFrame.unit = item.id; // 25;
+                        appInFrame.unit = item.id; // 25;
                         return [4 /*yield*/, this.start()];
                     case 1:
                         _a.sent();
@@ -78,13 +79,19 @@ var CApp = /** @class */ (function (_super) {
             return React.createElement(Page, { header: "\u9009\u62E9\u5C0F\u53F7", logout: true },
                 React.createElement(List, { items: _this.appUnits, item: { render: _this.renderRow, onClick: _this.onRowClick } }));
         };
+        var tonvaApp = ui.appName;
+        if (tonvaApp === undefined) {
+            throw 'appName like "owner/app" must be defined in UI';
+        }
         var parts = tonvaApp.split('/');
         if (parts.length !== 2) {
             throw 'tonvaApp name must be / separated, owner/app';
         }
         _this.appOwner = parts[0];
         _this.appName = parts[1];
-        _this.ui = ui || { uqs: {} };
+        if (ui.uqs === undefined)
+            ui.uqs = {};
+        _this.ui = ui;
         _this.caption = _this.res.caption || 'Tonva';
         return _this;
     }
@@ -95,7 +102,7 @@ var CApp = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         appName = this.appOwner + '/' + this.appName;
-                        cApp = new CApp(appName, { uqs: {} });
+                        cApp = new CApp({ appName: appName, uqs: {} });
                         keepNavBackButton = true;
                         return [4 /*yield*/, cApp.start(keepNavBackButton)];
                     case 1:
@@ -107,12 +114,12 @@ var CApp = /** @class */ (function (_super) {
     };
     CApp.prototype.loadUqs = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var retErrors, unit, app, id, uqs, promises, promiseChecks, _i, uqs_1, appUq, uqId, uqOwner, uqName, url, urlDebug, ws, access, token, uq, ui, cUq, results, _a, results_1, result, retError;
+            var retErrors, unit, app, id, uqs, promises, promiseChecks, roleAppUI, _i, uqs_1, appUq, uqId, uqOwner, uqName, access, uq, uqUI, cUq, results, _a, results_1, result, retError;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         retErrors = [];
-                        unit = meInFrame.unit;
+                        unit = appInFrame.unit;
                         return [4 /*yield*/, loadAppUqs(this.appOwner, this.appName)];
                     case 1:
                         app = _b.sent();
@@ -120,18 +127,21 @@ var CApp = /** @class */ (function (_super) {
                         this.id = id;
                         promises = [];
                         promiseChecks = [];
+                        return [4 /*yield*/, this.buildRoleAppUI()];
+                    case 2:
+                        roleAppUI = _b.sent();
                         for (_i = 0, uqs_1 = uqs; _i < uqs_1.length; _i++) {
                             appUq = uqs_1[_i];
-                            uqId = appUq.id, uqOwner = appUq.uqOwner, uqName = appUq.uqName, url = appUq.url, urlDebug = appUq.urlDebug, ws = appUq.ws, access = appUq.access, token = appUq.token;
+                            uqId = appUq.id, uqOwner = appUq.uqOwner, uqName = appUq.uqName, access = appUq.access;
                             uq = uqOwner + '/' + uqName;
-                            ui = this.ui && this.ui.uqs && this.ui.uqs[uq];
-                            cUq = this.newCUq(uq, uqId, access, ui || {});
+                            uqUI = roleAppUI && roleAppUI.uqs && roleAppUI.uqs[uq];
+                            cUq = this.newCUq(uq, uqId, access, uqUI || {});
                             this.cUqCollection[uq] = cUq;
                             promises.push(cUq.loadSchema());
                             promiseChecks.push(cUq.entities.uqApi.checkAccess());
                         }
                         return [4 /*yield*/, Promise.all(promises)];
-                    case 2:
+                    case 3:
                         results = _b.sent();
                         Promise.all(promiseChecks).then(function (checks) {
                             for (var _i = 0, checks_1 = checks; _i < checks_1.length; _i++) {
@@ -154,6 +164,37 @@ var CApp = /** @class */ (function (_super) {
                         if (retErrors.length === 0)
                             return [2 /*return*/];
                         return [2 /*return*/, retErrors];
+                }
+            });
+        });
+    };
+    CApp.prototype.buildRoleAppUI = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var hashParam, roles, ret, i, roleAppUI;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.ui)
+                            return [2 /*return*/, undefined];
+                        hashParam = nav.hashParam;
+                        if (!hashParam)
+                            return [2 /*return*/, this.ui];
+                        roles = this.ui.roles;
+                        ret = {};
+                        for (i in this.ui) {
+                            if (i === 'roles')
+                                continue;
+                            ret[i] = _.cloneDeep(this.ui[i]);
+                        }
+                        roleAppUI = roles && roles[hashParam];
+                        if (!(typeof roleAppUI === 'function')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, roleAppUI()];
+                    case 1:
+                        roleAppUI = _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        _.merge(ret, roleAppUI);
+                        return [2 /*return*/, ret];
                 }
             });
         });
@@ -210,51 +251,49 @@ var CApp = /** @class */ (function (_super) {
     });
     CApp.prototype.beforeStart = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var hash, unit, app, id, retErrors, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var predefinedUnit_1, app, id, user, _a, appUnit, retErrors, err_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        _a.trys.push([0, 5, , 6]);
-                        hash = document.location.hash;
-                        if (hash.startsWith('#tvdebug')) {
-                            this.isProduction = false;
-                            //await this.showMainPage();
-                            //return;
-                        }
-                        else {
-                            this.isProduction = hash.startsWith('#tv');
-                        }
-                        unit = meInFrame.unit;
-                        if (!(this.isProduction === false && (unit === undefined || unit <= 0))) return [3 /*break*/, 3];
+                        _b.trys.push([0, 5, , 6]);
+                        if (!(isDevelopment === true)) return [3 /*break*/, 3];
+                        predefinedUnit_1 = appInFrame.predefinedUnit;
                         return [4 /*yield*/, loadAppUqs(this.appOwner, this.appName)];
                     case 1:
-                        app = _a.sent();
+                        app = _b.sent();
                         id = app.id;
                         this.id = id;
-                        return [4 /*yield*/, this.loadAppUnits()];
+                        user = nav.user;
+                        if (!(user !== undefined && user.id > 0)) return [3 /*break*/, 3];
+                        _a = this;
+                        return [4 /*yield*/, centerApi.userAppUnits(this.id)];
                     case 2:
-                        _a.sent();
+                        _a.appUnits = _b.sent();
                         switch (this.appUnits.length) {
                             case 0:
-                                this.showUnsupport();
+                                this.showUnsupport( /*unit*/);
                                 return [2 /*return*/, false];
                             case 1:
-                                unit = this.appUnits[0].id;
-                                if (unit === undefined || unit < 0) {
-                                    this.showUnsupport();
+                                appUnit = this.appUnits[0].id;
+                                if (appUnit === undefined || appUnit < 0 ||
+                                    predefinedUnit_1 !== undefined && appUnit != predefinedUnit_1) {
+                                    this.showUnsupport( /*unit*/);
                                     return [2 /*return*/, false];
                                 }
-                                meInFrame.unit = unit;
+                                appInFrame.unit = appUnit;
                                 break;
                             default:
-                                //nav.clear();
+                                if (predefinedUnit_1 > 0 && this.appUnits.find(function (v) { return v.id === predefinedUnit_1; }) !== undefined) {
+                                    appInFrame.unit = predefinedUnit_1;
+                                    break;
+                                }
                                 nav.push(React.createElement(this.selectUnitPage, null));
                                 return [2 /*return*/, false];
                         }
-                        _a.label = 3;
+                        _b.label = 3;
                     case 3: return [4 /*yield*/, this.loadUqs()];
                     case 4:
-                        retErrors = _a.sent();
+                        retErrors = _b.sent();
                         if (retErrors !== undefined) {
                             this.openPage(React.createElement(Page, { header: "ERROR" },
                                 React.createElement("div", { className: "m-3" },
@@ -264,7 +303,7 @@ var CApp = /** @class */ (function (_super) {
                         }
                         return [2 /*return*/, true];
                     case 5:
-                        err_1 = _a.sent();
+                        err_1 = _b.sent();
                         nav.push(React.createElement(Page, { header: "App start error!" },
                             React.createElement("pre", null, typeof err_1 === 'string' ? err_1 : err_1.message)));
                         return [2 /*return*/, false];
@@ -309,36 +348,49 @@ var CApp = /** @class */ (function (_super) {
     CApp.prototype.clearPrevPages = function () {
         nav.clear();
     };
-    CApp.prototype.showUnsupport = function () {
+    CApp.prototype.showUnsupport = function ( /*unit:number*/) {
         this.clearPrevPages();
         var user = nav.user;
         var userName = user ? user.name : '[未登录]';
         this.openPage(React.createElement(Page, { header: "APP\u65E0\u6CD5\u8FD0\u884C", logout: true },
             React.createElement("div", { className: "m-3 text-danger container" },
                 React.createElement("div", { className: "form-group row" },
-                    React.createElement("div", { className: "col-2" },
-                        React.createElement(FA, { name: "exclamation-triangle" })),
-                    React.createElement("div", { className: "col" }, "\u7528\u6237\u4E0D\u652F\u6301APP")),
-                React.createElement("div", { className: "form-group row" },
-                    React.createElement("div", { className: "col-2" }, "\u7528\u6237: "),
+                    React.createElement("div", { className: "col-2" }, "\u767B\u5F55\u7528\u6237: "),
                     React.createElement("div", { className: "col" }, userName)),
                 React.createElement("div", { className: "form-group row" },
                     React.createElement("div", { className: "col-2" }, "App:"),
-                    React.createElement("div", { className: "col" }, this.appOwner + "/" + this.appName)))));
+                    React.createElement("div", { className: "col" }, this.appOwner + "/" + this.appName)),
+                React.createElement("div", { className: "form-group row" },
+                    React.createElement("div", { className: "col-2" },
+                        React.createElement(FA, { name: "exclamation-triangle" })),
+                    React.createElement("div", { className: "col" },
+                        React.createElement("div", { className: "text-muted" }, "\u65E0\u6CD5\u8FD0\u884C\u53EF\u80FD\u539F\u56E0\uFF1A"),
+                        React.createElement("ul", { className: "p-0" },
+                            React.createElement("li", null,
+                                "\u6CA1\u6709\u5C0F\u53F7\u8FD0\u884C ",
+                                this.ui.appName),
+                            React.createElement("li", null,
+                                "\u7528\u6237 ",
+                                React.createElement("b", null, userName),
+                                " \u6CA1\u6709\u52A0\u5165\u4EFB\u4F55\u4E00\u4E2A\u8FD0\u884C",
+                                this.ui.appName,
+                                "\u7684\u5C0F\u53F7")))))));
     };
     CApp.prototype.showMainPage = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var parts, action, uqId, sheetTypeId, sheetId, cUq;
+            var exHash, parts, action, uqId, sheetTypeId, sheetId, cUq;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        parts = document.location.hash.split('-');
-                        if (!(parts.length > 2)) return [3 /*break*/, 2];
-                        action = parts[2];
+                        exHash = getExHash();
+                        if (!(exHash !== undefined)) return [3 /*break*/, 2];
+                        parts = exHash.split('-');
+                        if (!(parts.length > 3)) return [3 /*break*/, 2];
+                        action = parts[3];
                         if (!(action === 'sheet' || action === 'sheet_debug')) return [3 /*break*/, 2];
-                        uqId = Number(parts[3]);
-                        sheetTypeId = Number(parts[4]);
-                        sheetId = Number(parts[5]);
+                        uqId = Number(parts[4]);
+                        sheetTypeId = Number(parts[5]);
+                        sheetId = Number(parts[6]);
                         cUq = this.getCUqFromId(uqId);
                         if (cUq === undefined) {
                             alert('unknown uqId: ' + uqId);
@@ -363,23 +415,6 @@ var CApp = /** @class */ (function (_super) {
                 return cUq;
         }
         return;
-    };
-    CApp.prototype.loadAppUnits = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var ret;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, centerApi.userAppUnits(this.id)];
-                    case 1:
-                        ret = _a.sent();
-                        this.appUnits = ret;
-                        if (ret.length === 1) {
-                            meInFrame.unit = ret[0].id;
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
     };
     return CApp;
 }(Controller));
@@ -415,8 +450,12 @@ var VAppMain = /** @class */ (function (_super) {
         return this.appContent();
     };
     VAppMain.prototype.appPage = function () {
+        var _this = this;
         var caption = this.controller.caption;
-        return React.createElement(Page, { header: caption, logout: function () { meInFrame.unit = undefined; } }, this.appContent());
+        return React.createElement(Page, { header: caption, logout: function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                appInFrame.unit = undefined;
+                return [2 /*return*/];
+            }); }); } }, this.appContent());
     };
     return VAppMain;
 }(VPage));

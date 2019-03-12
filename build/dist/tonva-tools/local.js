@@ -33,6 +33,7 @@ var LocalData = /** @class */ (function () {
     LocalData.prototype.logoutClear = function () {
         [
             this.user,
+            this.unit,
             this.homeTabCur
         ].map(function (d) { return d.clear(); });
     };

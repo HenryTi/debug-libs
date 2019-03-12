@@ -100,6 +100,17 @@ var Login = /** @class */ (function (_super) {
                 }
             });
         }); };
+        _this.onEnter = function (name, context) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(name === 'password')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.onSubmit('login', context)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/];
+                }
+            });
+        }); };
         _this.clickReg = function () {
             //nav.replace(<RegisterView />);
             var register = new RegisterController(undefined);
@@ -128,7 +139,7 @@ var Login = /** @class */ (function (_super) {
                 React.createElement("div", { className: "w-20c" },
                     top,
                     React.createElement("div", { className: "h-2c" }),
-                    React.createElement(Form, { schema: schema, uiSchema: this.uiSchema, onButtonClick: this.onSubmit, requiredFlag: false }),
+                    React.createElement(Form, { schema: schema, uiSchema: this.uiSchema, onButtonClick: this.onSubmit, onEnter: this.onEnter, requiredFlag: false }),
                     React.createElement("button", { className: "btn btn-link btn-block", onClick: function () { return _this.clickForget(); } }, "\u5FD8\u8BB0\u5BC6\u7801")),
                 React.createElement("div", { className: "flex-fill" }),
                 React.createElement("div", { className: "flex-fill" })));

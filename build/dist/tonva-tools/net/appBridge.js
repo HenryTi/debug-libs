@@ -57,7 +57,7 @@ var AppInFrameClass = /** @class */ (function () {
     });
     return AppInFrameClass;
 }());
-export var meInFrame = new AppInFrameClass();
+export var appInFrame = new AppInFrameClass();
 /* {
     hash: undefined,
     get unit():number {return } undefined, //debugUnitId,
@@ -212,17 +212,38 @@ function onAppApiReturn(message) {
         });
     });
 }
-export function setMeInFrame(appHash) {
-    var parts = appHash.split('-');
-    var len = parts.length;
-    meInFrame.hash = parts[0].substr(3);
-    if (len > 0)
-        meInFrame.unit = Number(parts[1]);
-    if (len > 1)
-        meInFrame.page = parts[2];
-    if (len > 2)
-        meInFrame.param = parts.slice(3);
-    return meInFrame;
+export function setAppInFrame(appHash) {
+    if (appHash) {
+        var parts = appHash.split('-');
+        var len = parts.length;
+        if (len > 0) {
+            var p = 1;
+            appInFrame.hash = parts[p++];
+            if (len > 0)
+                appInFrame.unit = Number(parts[p++]);
+            if (len > 1)
+                appInFrame.page = parts[p++];
+            if (len > 2)
+                appInFrame.param = parts.slice(p++);
+        }
+    }
+    return appInFrame;
+}
+export function getExHashPos() {
+    var hash = document.location.hash;
+    if (hash !== undefined && hash.length > 0) {
+        var pos = hash.lastIndexOf('#tv-');
+        if (pos < 0)
+            pos = hash.lastIndexOf('#tvdebug-');
+        return pos;
+    }
+    return -1;
+}
+export function getExHash() {
+    var pos = getExHashPos();
+    if (pos < 0)
+        return undefined;
+    return document.location.hash.substring(pos);
 }
 export function appUrl(url, unitId, page, param) {
     var u;
@@ -234,7 +255,7 @@ export function appUrl(url, unitId, page, param) {
             break;
         }
     }
-    url += '#tv' + u + '-' + unitId;
+    url += '#tv-' + u + '-' + unitId;
     if (page !== undefined) {
         url += '-' + page;
         if (param !== undefined) {
@@ -256,7 +277,7 @@ export function appUq(uq, uqOwner, uqName) {
                     if (uqToken !== undefined)
                         return [2 /*return*/, uqToken];
                     if (!!isBridged()) return [3 /*break*/, 2];
-                    return [4 /*yield*/, uqTokenApi.uq({ unit: meInFrame.unit, uqOwner: uqOwner, uqName: uqName })];
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: appInFrame.unit, uqOwner: uqOwner, uqName: uqName })];
                 case 1:
                     uqToken = _a.sent();
                     if (uqToken === undefined) {
@@ -272,7 +293,7 @@ export function appUq(uq, uqOwner, uqName) {
                     uqTokens[uq] = uqToken;
                     return [2 /*return*/, uqToken];
                 case 2:
-                    console.log("appApi parent send: %s", meInFrame.hash);
+                    console.log("appApi parent send: %s", appInFrame.hash);
                     uqToken = {
                         name: uq,
                         url: undefined,
@@ -303,7 +324,7 @@ export function appUq(uq, uqOwner, uqName) {
                             (window.opener || window.parent).postMessage({
                                 type: 'app-api',
                                 apiName: uq,
-                                hash: meInFrame.hash,
+                                hash: appInFrame.hash,
                             }, "*");
                         })];
             }
