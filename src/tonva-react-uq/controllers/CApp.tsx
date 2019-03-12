@@ -4,6 +4,7 @@ import { Page, loadAppUqs, nav, appInFrame, Controller, TypeVPage, VPage, resLan
 import { List, LMR, FA } from 'tonva-react-form';
 import { CUq, EntityType, UqUI } from './uq';
 import { centerApi } from '../centerApi';
+import { LocalData } from 'tonva-tools/local';
 
 export interface RoleAppUI {
     CApp?: typeof CApp;
@@ -256,6 +257,18 @@ export class CApp extends Controller {
                         </ul>
                     </div>
                 </div>
+                {
+                    predefinedUnit || 
+                    <div className="form-group row">
+                    <div className="col-2"></div>
+                    <div className="col">
+                        预设小号定义在 public/unit.json 文件中。
+                        定义了这个文件的程序，只能由url直接启动。
+                        用户第一次访问app之后，会缓存在localStorage里。<br/>
+                        如果要删去缓存的预定义Unit，logout然后再login。
+                    </div>
+                </div>
+                }
             </div>
         </Page>)
     }
