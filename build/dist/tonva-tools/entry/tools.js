@@ -1,10 +1,13 @@
 import * as React from 'react';
+import { nav } from 'tonva-tools';
 var logo = require('../img/logo.svg');
-export var tonvaTop = React.createElement("div", { className: "d-flex align-items-center" },
-    React.createElement("img", { className: "App-logo h-3c position-absolute", src: logo }),
-    React.createElement("div", { className: "h3 flex-fill text-center" },
-        React.createElement("span", { className: "text-primary mr-3" }, "\u540C"),
-        React.createElement("span", { className: "text-danger" }, "\u82B1")));
+export function tonvaTop() {
+    return nav.loginTop(React.createElement("div", { className: "d-flex align-items-center" },
+        React.createElement("img", { className: "App-logo h-3c position-absolute", src: logo }),
+        React.createElement("div", { className: "h3 flex-fill text-center" },
+            React.createElement("span", { className: "text-primary mr-3" }, "\u540C"),
+            React.createElement("span", { className: "text-danger" }, "\u82B1"))));
+}
 var mobileRegex = /^[0-9]*$/;
 var emailRegex = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
 // /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/

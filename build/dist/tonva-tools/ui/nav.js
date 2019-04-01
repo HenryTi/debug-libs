@@ -70,7 +70,7 @@ import { netToken } from '../net/netToken';
 import FetchErrorView from './fetchErrorView';
 import { appUrl, setAppInFrame, getExHash, getExHashPos } from '../net/appBridge';
 import { LocalData } from '../local';
-import { guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, isDevelopment, host } from '../net';
+import { guestApi, logoutApis, setCenterUrl, setCenterToken, WSChannel, appInFrame, isDevelopment, host } from '../net';
 import { wsBridge } from '../net/wsChannel';
 import { resOptions } from './res';
 import { Loading } from './loading';
@@ -477,7 +477,7 @@ var Nav = /** @class */ (function () {
             });
         });
     };
-    Nav.prototype.getUnitName = function () {
+    Nav.prototype.getPredefinedUnitName = function () {
         return __awaiter(this, void 0, void 0, function () {
             var unitRes, res, err_1;
             return __generator(this, function (_a) {
@@ -510,7 +510,7 @@ var Nav = /** @class */ (function () {
                         if (!(unit !== undefined)) return [3 /*break*/, 2];
                         if (isDevelopment !== true)
                             return [2 /*return*/, unit.id];
-                        return [4 /*yield*/, this.getUnitName()];
+                        return [4 /*yield*/, this.getPredefinedUnitName()];
                     case 1:
                         unitName = _a.sent();
                         if (unitName === undefined)
@@ -518,7 +518,7 @@ var Nav = /** @class */ (function () {
                         if (unit.name === unitName)
                             return [2 /*return*/, unit.id];
                         return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, this.getUnitName()];
+                    case 2: return [4 /*yield*/, this.getPredefinedUnitName()];
                     case 3:
                         unitName = _a.sent();
                         if (unitName === undefined)
@@ -535,9 +535,12 @@ var Nav = /** @class */ (function () {
             });
         });
     };
+    Nav.prototype.setSettings = function (settings) {
+        this.navSettings = settings;
+    };
     Nav.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var hash, pos, url, ws, resHost, guest, exHash, appInFrame_1, unit, user, notLogined, err_2;
+            var hash, pos, url, ws, resHost, guest, exHash, appInFrame_1, predefinedUnit, user, notLogined, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -585,8 +588,8 @@ var Nav = /** @class */ (function () {
                         }
                         return [4 /*yield*/, this.loadPredefinedUnit()];
                     case 4:
-                        unit = _a.sent();
-                        appInFrame_1.predefinedUnit = unit;
+                        predefinedUnit = _a.sent();
+                        appInFrame_1.predefinedUnit = predefinedUnit;
                         user = this.local.user.get();
                         if (!(user === undefined)) return [3 /*break*/, 9];
                         notLogined = this.nav.props.notLogined;
@@ -668,7 +671,10 @@ var Nav = /** @class */ (function () {
             });
         });
     };
-    Nav.prototype.showLogin = function (callback, top, withBack) {
+    Nav.prototype.loginTop = function (defaultTop) {
+        return (this.navSettings && this.navSettings.loginTop) || defaultTop;
+    };
+    Nav.prototype.showLogin = function (callback, withBack) {
         return __awaiter(this, void 0, void 0, function () {
             var lv, loginView;
             return __generator(this, function (_a) {
@@ -676,7 +682,7 @@ var Nav = /** @class */ (function () {
                     case 0: return [4 /*yield*/, import('../entry/login')];
                     case 1:
                         lv = _a.sent();
-                        loginView = React.createElement(lv.default, { withBack: withBack, callback: callback, top: top });
+                        loginView = React.createElement(lv.default, { withBack: withBack, callback: callback });
                         if (withBack !== true) {
                             this.nav.clear();
                             this.pop();
@@ -706,6 +712,7 @@ var Nav = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        appInFrame.unit = undefined;
                         this.local.logoutClear();
                         this.user = undefined; //{} as User;
                         logoutApis();

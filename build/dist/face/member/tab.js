@@ -76,14 +76,12 @@ var TabController = /** @class */ (function () {
                     case 0:
                         nav.logMark();
                         this.cApp = new CApp({ appName: tonvaApp, uqs: {} });
-                        return [4 /*yield*/, this.cApp.load()];
-                    case 1:
-                        _a.sent();
+                        //await this.cApp.load();
                         nav.logStep('await this.cApp.load()');
                         this.cUq = this.cApp.getCUq('JKDev/jkOrder');
                         this.tuidProduct = this.cUq.tuid('product');
                         return [4 /*yield*/, this.tuidProduct.search('', 0, 100)];
-                    case 2:
+                    case 1:
                         ret = _a.sent();
                         nav.logStep('let ret = await this.tuidProduct.search(-, 0, 100)');
                         this.items = ret;

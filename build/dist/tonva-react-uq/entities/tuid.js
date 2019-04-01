@@ -252,6 +252,51 @@ var Tuid = /** @class */ (function (_super) {
             _tuid.useId(tuidValue[f.name]);
         }
     };
+    Tuid.prototype.from = function () {
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/];
+        }); });
+    };
+    Tuid.prototype.unpackTuidIds = function (values) {
+        return __awaiter(this, void 0, void 0, function () {
+            var mainFields, ret, len, p, ch, row, tuidMain, ret;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(this.schemaFrom === undefined)) return [3 /*break*/, 1];
+                        if (this.name === 'contact')
+                            debugger;
+                        mainFields = this.schema.mainFields;
+                        if (mainFields === undefined)
+                            return [2 /*return*/, values];
+                        ret = [];
+                        len = values.length;
+                        p = 0;
+                        while (p < len) {
+                            ch = values.charCodeAt(p);
+                            if (ch === 10) {
+                                ++p;
+                                break;
+                            }
+                            row = {};
+                            p = this.unpackRow(row, mainFields, values, p);
+                            ret.push(row);
+                        }
+                        return [2 /*return*/, ret];
+                    case 1:
+                        if (this.name === 'contact')
+                            debugger;
+                        return [4 /*yield*/, this.from()];
+                    case 2:
+                        tuidMain = _a.sent();
+                        return [4 /*yield*/, tuidMain.unpackTuidIds(values)];
+                    case 3:
+                        ret = _a.sent();
+                        return [2 /*return*/, ret];
+                }
+            });
+        });
+    };
     Tuid.prototype.cacheIds = function () {
         return __awaiter(this, void 0, void 0, function () {
             var name, arr, api, tuids, _i, tuids_1, tuidValue;
@@ -273,6 +318,11 @@ var Tuid = /** @class */ (function (_super) {
                         return [4 /*yield*/, api.tuidIds(name, arr, this.waitingIds)];
                     case 2:
                         tuids = _a.sent();
+                        return [4 /*yield*/, this.unpackTuidIds(tuids)];
+                    case 3:
+                        tuids = _a.sent();
+                        if (this.name === 'contact')
+                            debugger;
                         for (_i = 0, tuids_1 = tuids; _i < tuids_1.length; _i++) {
                             tuidValue = tuids_1[_i];
                             if (this.cacheValue(tuidValue) === false)
@@ -281,7 +331,7 @@ var Tuid = /** @class */ (function (_super) {
                             this.afterCacheId(tuidValue);
                         }
                         return [4 /*yield*/, this.cacheDivIds()];
-                    case 3:
+                    case 4:
                         _a.sent();
                         return [2 /*return*/];
                 }
@@ -564,14 +614,12 @@ var TuidMain = /** @class */ (function (_super) {
                         if (this.schemaFrom === undefined)
                             return [2 /*return*/, this.entities.cUq];
                         _a = this.schemaFrom, owner = _a.owner, uq = _a.uq;
-                        return [4 /*yield*/, this.entities.cUq];
-                    case 1:
-                        cUq = _b.sent();
+                        cUq = this.entities.cUq;
                         cApp = cUq.cApp;
                         if (cApp === undefined)
                             return [2 /*return*/, cUq];
                         return [4 /*yield*/, cApp.getImportUq(owner, uq)];
-                    case 2:
+                    case 1:
                         cUqFrm = _b.sent();
                         if (cUqFrm === undefined) {
                             console.error(owner + "/" + uq + " \u4E0D\u5B58\u5728");
@@ -579,7 +627,7 @@ var TuidMain = /** @class */ (function (_super) {
                             return [2 /*return*/, cUq];
                         }
                         return [4 /*yield*/, cUqFrm.loadSchema()];
-                    case 3:
+                    case 2:
                         retErrors = _b.sent();
                         if (retErrors !== undefined) {
                             console.error('cUq.loadSchema: ' + retErrors);

@@ -79,6 +79,7 @@ var CApp = /** @class */ (function (_super) {
             return React.createElement(Page, { header: "\u9009\u62E9\u5C0F\u53F7", logout: true },
                 React.createElement(List, { items: _this.appUnits, item: { render: _this.renderRow, onClick: _this.onRowClick } }));
         };
+        nav.setSettings(ui);
         var tonvaApp = ui.appName;
         if (tonvaApp === undefined) {
             throw 'appName like "owner/app" must be defined in UI';
@@ -130,6 +131,7 @@ var CApp = /** @class */ (function (_super) {
                         return [4 /*yield*/, this.buildRoleAppUI()];
                     case 2:
                         roleAppUI = _b.sent();
+                        this.ui = roleAppUI;
                         for (_i = 0, uqs_1 = uqs; _i < uqs_1.length; _i++) {
                             appUq = uqs_1[_i];
                             uqId = appUq.id, uqOwner = appUq.uqOwner, uqName = appUq.uqName, access = appUq.access;
@@ -170,7 +172,7 @@ var CApp = /** @class */ (function (_super) {
     };
     CApp.prototype.buildRoleAppUI = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var hashParam, roles, ret, i, roleAppUI;
+            var hashParam, roles, roleAppUI, ret, i;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -180,13 +182,15 @@ var CApp = /** @class */ (function (_super) {
                         if (!hashParam)
                             return [2 /*return*/, this.ui];
                         roles = this.ui.roles;
+                        roleAppUI = roles && roles[hashParam];
+                        if (!roleAppUI)
+                            return [2 /*return*/, this.ui];
                         ret = {};
                         for (i in this.ui) {
                             if (i === 'roles')
                                 continue;
-                            ret[i] = _.cloneDeep(this.ui[i]);
+                            ret[i] = this.ui[i];
                         }
-                        roleAppUI = roles && roles[hashParam];
                         if (!(typeof roleAppUI === 'function')) return [3 /*break*/, 2];
                         return [4 /*yield*/, roleAppUI()];
                     case 1:
@@ -271,13 +275,13 @@ var CApp = /** @class */ (function (_super) {
                         _a.appUnits = _b.sent();
                         switch (this.appUnits.length) {
                             case 0:
-                                this.showUnsupport( /*unit*/);
+                                this.showUnsupport(predefinedUnit_1);
                                 return [2 /*return*/, false];
                             case 1:
                                 appUnit = this.appUnits[0].id;
                                 if (appUnit === undefined || appUnit < 0 ||
                                     predefinedUnit_1 !== undefined && appUnit != predefinedUnit_1) {
-                                    this.showUnsupport( /*unit*/);
+                                    this.showUnsupport(predefinedUnit_1);
                                     return [2 /*return*/, false];
                                 }
                                 appInFrame.unit = appUnit;
@@ -328,18 +332,6 @@ var CApp = /** @class */ (function (_super) {
             });
         });
     };
-    CApp.prototype.load = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.beforeStart()];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     CApp.prototype.render = function () {
         return this.renderView(this.VAppMain);
     };
@@ -348,7 +340,7 @@ var CApp = /** @class */ (function (_super) {
     CApp.prototype.clearPrevPages = function () {
         nav.clear();
     };
-    CApp.prototype.showUnsupport = function ( /*unit:number*/) {
+    CApp.prototype.showUnsupport = function (predefinedUnit) {
         this.clearPrevPages();
         var user = nav.user;
         var userName = user ? user.name : '[未登录]';
@@ -360,6 +352,9 @@ var CApp = /** @class */ (function (_super) {
                 React.createElement("div", { className: "form-group row" },
                     React.createElement("div", { className: "col-2" }, "App:"),
                     React.createElement("div", { className: "col" }, this.appOwner + "/" + this.appName)),
+                React.createElement("div", { className: "form-group row" },
+                    React.createElement("div", { className: "col-2" }, "\u9884\u8BBE\u5C0F\u53F7:"),
+                    React.createElement("div", { className: "col" }, predefinedUnit || React.createElement("small", { className: "text-muted" }, "[\u65E0\u9884\u8BBE\u5C0F\u53F7]"))),
                 React.createElement("div", { className: "form-group row" },
                     React.createElement("div", { className: "col-2" },
                         React.createElement(FA, { name: "exclamation-triangle" })),
@@ -374,7 +369,20 @@ var CApp = /** @class */ (function (_super) {
                                 React.createElement("b", null, userName),
                                 " \u6CA1\u6709\u52A0\u5165\u4EFB\u4F55\u4E00\u4E2A\u8FD0\u884C",
                                 this.ui.appName,
-                                "\u7684\u5C0F\u53F7")))))));
+                                "\u7684\u5C0F\u53F7"),
+                            predefinedUnit &&
+                                React.createElement("li", null,
+                                    "\u9884\u8BBE\u5C0F\u53F7 ",
+                                    React.createElement("b", null, predefinedUnit),
+                                    " \u6CA1\u6709\u8FD0\u884CApp ",
+                                    this.ui.appName)))),
+                predefinedUnit ||
+                    React.createElement("div", { className: "form-group row" },
+                        React.createElement("div", { className: "col-2" }),
+                        React.createElement("div", { className: "col" },
+                            "\u9884\u8BBE\u5C0F\u53F7\u5B9A\u4E49\u5728 public/unit.json \u6587\u4EF6\u4E2D\u3002 \u5B9A\u4E49\u4E86\u8FD9\u4E2A\u6587\u4EF6\u7684\u7A0B\u5E8F\uFF0C\u53EA\u80FD\u7531url\u76F4\u63A5\u542F\u52A8\u3002 \u7528\u6237\u7B2C\u4E00\u6B21\u8BBF\u95EEapp\u4E4B\u540E\uFF0C\u4F1A\u7F13\u5B58\u5728localStorage\u91CC\u3002",
+                            React.createElement("br", null),
+                            "\u5982\u679C\u8981\u5220\u53BB\u7F13\u5B58\u7684\u9884\u5B9A\u4E49Unit\uFF0Clogout\u7136\u540E\u518Dlogin\u3002")))));
     };
     CApp.prototype.showMainPage = function () {
         return __awaiter(this, void 0, void 0, function () {

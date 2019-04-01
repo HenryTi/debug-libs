@@ -308,30 +308,38 @@ var Entity = /** @class */ (function () {
             ch = data.charCodeAt(p);
             if (ch === 9) {
                 var f = fields[i];
+                var name_3 = f.name;
                 if (ch0 !== 8) {
                     if (p > c) {
                         var v = data.substring(c, p);
-                        ret[f.name] = this.to(ret, v, f);
+                        ret[name_3] = this.to(ret, v, f);
                     }
                 }
                 else {
-                    ret[f.name] = null;
+                    ret[name_3] = null;
                 }
                 c = p + 1;
                 ++i;
-                if (i >= fLen)
+                if (i >= fLen) {
+                    p = data.indexOf('\n', c);
+                    if (p >= 0)
+                        ++p;
+                    else
+                        p = len;
                     break;
+                }
             }
             else if (ch === 10) {
                 var f = fields[i];
+                var name_4 = f.name;
                 if (ch0 !== 8) {
                     if (p > c) {
                         var v = data.substring(c, p);
-                        ret[f.name] = this.to(ret, v, f);
+                        ret[name_4] = this.to(ret, v, f);
                     }
                 }
                 else {
-                    ret[f.name] = null;
+                    ret[name_4] = null;
                 }
                 ++p;
                 ++i;
@@ -348,6 +356,7 @@ var Entity = /** @class */ (function () {
             case 'time':
                 var date = new Date(Number(v));
                 return date;
+            case 'id':
             case 'tinyint':
             case 'smallint':
             case 'int':

@@ -172,16 +172,16 @@ function initSubWin(message) {
 }
 function onReceiveAppApiMessage(hash, apiName) {
     return __awaiter(this, void 0, void 0, function () {
-        var appInFrame, unit, parts, ret;
+        var appInFrame, unit, predefinedUnit, parts, ret;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     appInFrame = appsInFrame[hash];
                     if (appInFrame === undefined)
                         return [2 /*return*/, { name: apiName, url: undefined, urlDebug: undefined, token: undefined }];
-                    unit = appInFrame.unit;
+                    unit = appInFrame.unit, predefinedUnit = appInFrame.predefinedUnit;
                     parts = apiName.split('/');
-                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit, uqOwner: parts[0], uqName: parts[1] })];
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit || predefinedUnit, uqOwner: parts[0], uqName: parts[1] })];
                 case 1:
                     ret = _a.sent();
                     if (ret === undefined) {
@@ -268,7 +268,7 @@ export function appUrl(url, unitId, page, param) {
 }
 export function appUq(uq, uqOwner, uqName) {
     return __awaiter(this, void 0, void 0, function () {
-        var uqToken, err, url, urlDebug, realUrl;
+        var uqToken, unit, predefinedUnit, err, url, urlDebug, realUrl;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -277,7 +277,8 @@ export function appUq(uq, uqOwner, uqName) {
                     if (uqToken !== undefined)
                         return [2 /*return*/, uqToken];
                     if (!!isBridged()) return [3 /*break*/, 2];
-                    return [4 /*yield*/, uqTokenApi.uq({ unit: appInFrame.unit, uqOwner: uqOwner, uqName: uqName })];
+                    unit = appInFrame.unit, predefinedUnit = appInFrame.predefinedUnit;
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit || predefinedUnit, uqOwner: uqOwner, uqName: uqName })];
                 case 1:
                     uqToken = _a.sent();
                     if (uqToken === undefined) {

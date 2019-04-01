@@ -48,9 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import * as React from 'react';
 import { nav, Page, Form, resLang, Controller, VPage } from '../ui';
-//import LoginView from './login';
 import userApi from './userApi';
-//import RegSuccess from './regSuccess';
 import '../css/va-form.css';
 import { registerRes } from './res';
 import { tonvaTop, getSender } from './tools';
@@ -270,7 +268,7 @@ var AccountPage = /** @class */ (function (_super) {
         _this.page = function () {
             return React.createElement(Page, { header: _this.controller.accountPageCaption },
                 React.createElement("div", { className: "w-max-20c my-5 py-5", style: { marginLeft: 'auto', marginRight: 'auto' } },
-                    tonvaTop,
+                    tonvaTop(),
                     React.createElement("div", { className: "h-3c" }),
                     React.createElement(Form, { schema: _this.schema, uiSchema: _this.uiSchema, onButtonClick: _this.onSubmit, onEnter: _this.onEnter, requiredFlag: false })));
         };
