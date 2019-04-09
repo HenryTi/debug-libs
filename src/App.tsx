@@ -150,14 +150,16 @@ class App extends React.Component {
             mainSubs,
         ]
 
+        /*
+        <Uploader />
+        {one.render()}
+        <br/>
+        <br/>
+        {list.render()}
+        */
         let page = <Page header={false}>
-            <Uploader />
-            {one.render()}
-            <br/>
-            <br/>
-            {list.render()}
+            <Tabs tabs={faceTabs} />
         </Page>;
-        //<Tabs tabs={faceTabs} />
         return <NavView 
             onLogined={async () => nav.push(page)}
             notLogined={async () => nav.push(page)} />;
