@@ -345,6 +345,18 @@ var CTuidEdit = /** @class */ (function (_super) {
             });
         });
     };
+    CTuidEdit.prototype.edit = function (values) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.openVPage(this.VTuidEdit, values)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return CTuidEdit;
 }(CTuidBase));
 export { CTuidEdit };
