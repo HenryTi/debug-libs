@@ -47,7 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import * as React from 'react';
-import { autorun } from 'mobx';
+import { observable, autorun } from 'mobx';
 import classNames from 'classnames';
 import { factory } from './widgets';
 import 'font-awesome/css/font-awesome.min.css';
@@ -197,8 +197,10 @@ var Form = /** @class */ (function (_super) {
             }
             arr.push(r);
         }
-        //data[name] = observable(arr);
-        data[name] = arr;
+        // 如果没有observable，行删除标志点击不管用
+        // 不知道这里为什么要去掉observable。有可能会有别的问题
+        data[name] = observable(arr);
+        //data[name] = arr;
         return;
     };
     Form.prototype.calcSelectOrDelete = function () {

@@ -27,8 +27,6 @@ export function serializeJson(obj) {
     }
     function serializeObj(obj, retObj) {
         for (var i in obj) {
-            //if (i === '_tuid') continue;
-            //if (i === 'waitingIds') debugger;
             retObj[i] = serial(obj[i]);
         }
     }

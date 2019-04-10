@@ -48,7 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import * as React from 'react';
 import _ from 'lodash';
-import { Page, loadAppUqs, nav, appInFrame, Controller, VPage, resLang, getExHash, isDevelopment } from 'tonva-tools';
+import { Page, loadAppUqs, nav, appInFrame, Controller, VPage, resLang, getExHash } from 'tonva-tools';
 import { List, LMR, FA } from 'tonva-react-form';
 import { CUq } from './uq';
 import { centerApi } from '../centerApi';
@@ -113,23 +113,20 @@ var CApp = /** @class */ (function (_super) {
             });
         });
     };
-    CApp.prototype.loadUqs = function () {
+    CApp.prototype.loadUqs = function (app) {
         return __awaiter(this, void 0, void 0, function () {
-            var retErrors, unit, app, id, uqs, promises, promiseChecks, roleAppUI, _i, uqs_1, appUq, uqId, uqOwner, uqName, access, uq, uqUI, cUq, results, _a, results_1, result, retError;
+            var retErrors, unit, id, uqs, promises, promiseChecks, roleAppUI, _i, uqs_1, appUq, uqId, uqOwner, uqName, access, uq, uqUI, cUq, results, _a, results_1, result, retError;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         retErrors = [];
                         unit = appInFrame.unit;
-                        return [4 /*yield*/, loadAppUqs(this.appOwner, this.appName)];
-                    case 1:
-                        app = _b.sent();
                         id = app.id, uqs = app.uqs;
                         this.id = id;
                         promises = [];
                         promiseChecks = [];
                         return [4 /*yield*/, this.buildRoleAppUI()];
-                    case 2:
+                    case 1:
                         roleAppUI = _b.sent();
                         this.ui = roleAppUI;
                         for (_i = 0, uqs_1 = uqs; _i < uqs_1.length; _i++) {
@@ -143,7 +140,7 @@ var CApp = /** @class */ (function (_super) {
                             promiseChecks.push(cUq.entities.uqApi.checkAccess());
                         }
                         return [4 /*yield*/, Promise.all(promises)];
-                    case 3:
+                    case 2:
                         results = _b.sent();
                         Promise.all(promiseChecks).then(function (checks) {
                             for (var _i = 0, checks_1 = checks; _i < checks_1.length; _i++) {
@@ -204,30 +201,23 @@ var CApp = /** @class */ (function (_super) {
         });
     };
     CApp.prototype.getImportUq = function (uqOwner, uqName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var uq, cUq, ui, uqId, retError;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        uq = uqOwner + '/' + uqName;
-                        cUq = this.cImportUqs[uq];
-                        if (cUq !== undefined)
-                            return [2 /*return*/, cUq];
-                        ui = this.ui && this.ui.uqs && this.ui.uqs[uq];
-                        uqId = -1;
-                        this.cImportUqs[uq] = cUq = this.newCUq(uq, uqId, undefined, ui || {});
-                        return [4 /*yield*/, cUq.loadSchema()];
-                    case 1:
-                        retError = _a.sent();
-                        if (retError !== undefined) {
-                            console.error(retError);
-                            debugger;
-                            return [2 /*return*/];
-                        }
-                        return [2 /*return*/, cUq];
-                }
-            });
-        });
+        var uq = uqOwner + '/' + uqName;
+        var cUq = this.cImportUqs[uq];
+        if (cUq !== undefined)
+            return cUq;
+        var ui = this.ui && this.ui.uqs && this.ui.uqs[uq];
+        var uqId = -1; // unknown
+        this.cImportUqs[uq] = cUq = this.getCUq(uq);
+        //this.newCUq(uq, uqId, undefined, ui || {});
+        /*
+        let retError = await cUq.loadSchema();
+        if (retError !== undefined) {
+            console.error(retError);
+            debugger;
+            return;
+        }
+        */
+        return cUq;
     };
     CApp.prototype.newCUq = function (uq, uqId, access, ui) {
         var cUq = new (this.ui.CUq || CUq)(this, uq, this.id, uqId, access, ui);
@@ -245,8 +235,8 @@ var CApp = /** @class */ (function (_super) {
         enumerable: true,
         configurable: true
     });
-    CApp.prototype.getCUq = function (apiName) {
-        return this.cUqCollection[apiName];
+    CApp.prototype.getCUq = function (uq) {
+        return this.cUqCollection[uq];
     };
     Object.defineProperty(CApp.prototype, "VAppMain", {
         get: function () { return (this.ui && this.ui.main) || VAppMain; },
@@ -255,16 +245,15 @@ var CApp = /** @class */ (function (_super) {
     });
     CApp.prototype.beforeStart = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var predefinedUnit_1, app, id, user, _a, appUnit, retErrors, err_1;
+            var app, predefinedUnit_1, id, user, _a, appUnit, retErrors, err_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 5, , 6]);
-                        if (!(isDevelopment === true)) return [3 /*break*/, 3];
-                        predefinedUnit_1 = appInFrame.predefinedUnit;
                         return [4 /*yield*/, loadAppUqs(this.appOwner, this.appName)];
                     case 1:
                         app = _b.sent();
+                        predefinedUnit_1 = appInFrame.predefinedUnit;
                         id = app.id;
                         this.id = id;
                         user = nav.user;
@@ -295,7 +284,7 @@ var CApp = /** @class */ (function (_super) {
                                 return [2 /*return*/, false];
                         }
                         _b.label = 3;
-                    case 3: return [4 /*yield*/, this.loadUqs()];
+                    case 3: return [4 /*yield*/, this.loadUqs(app)];
                     case 4:
                         retErrors = _b.sent();
                         if (retErrors !== undefined) {

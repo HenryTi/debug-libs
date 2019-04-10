@@ -161,15 +161,14 @@ var Entities = /** @class */ (function () {
         this.cacheTimer = undefined;
     };
     Entities.prototype.buildTuids = function (tuids) {
-        var proxyColl = {};
+        //let proxyColl = {} as any;
         for (var i in tuids) {
             var schema = tuids[i];
-            var name_1 = schema.name, typeId = schema.typeId, proxies = schema.proxies;
+            var name_1 = schema.name, typeId = schema.typeId /*, proxies*/;
             var tuid = this.newTuid(i, typeId);
             tuid.sys = true;
             //tuid.setSchema(schema);
-            if (proxies !== undefined)
-                proxyColl[i] = proxies;
+            //if (proxies !== undefined) proxyColl[i] = proxies;
         }
         for (var i in tuids) {
             var schema = tuids[i];
@@ -178,14 +177,18 @@ var Entities = /** @class */ (function () {
             //tuid.sys = true;
             tuid.setSchema(schema);
         }
-        for (var i in proxyColl) {
-            var proxies = proxyColl[i];
-            var tuid = this.tuids[i];
+        /*
+        for (let i in proxyColl) {
+            let proxies:string[] = proxyColl[i];
+            let tuid = this.tuids[i];
             tuid.proxies = {};
-            for (var _i = 0, proxies_1 = proxies; _i < proxies_1.length; _i++) {
-                var p = proxies_1[_i];
+            for (let p of proxies) {
                 tuid.proxies[p] = this.tuids[p];
             }
+        }*/
+        for (var i in this.tuids) {
+            var tuid = this.tuids[i];
+            tuid.buildFieldsTuid();
         }
     };
     Entities.prototype.buildAccess = function (access) {

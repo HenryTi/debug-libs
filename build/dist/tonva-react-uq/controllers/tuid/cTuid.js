@@ -96,12 +96,12 @@ var CTuid = /** @class */ (function (_super) {
     return CTuid;
 }(CEntity));
 export { CTuid };
-var CTuidMain = /** @class */ (function (_super) {
-    __extends(CTuidMain, _super);
-    function CTuidMain(cUq, entity, ui, res) {
+var CTuidBase = /** @class */ (function (_super) {
+    __extends(CTuidBase, _super);
+    function CTuidBase(cUq, entity, ui, res) {
         var _this = _super.call(this, cUq, entity, ui, res) || this;
-        var tuid = _this.entity;
-        _this.proxies = tuid.proxies;
+        //let tuid = this.entity;
+        //this.proxies = tuid.proxies;
         if (_this.proxies !== undefined) {
             _this.proxyLinks = [];
             for (var i in _this.proxies) {
@@ -111,74 +111,28 @@ var CTuidMain = /** @class */ (function (_super) {
         }
         return _this;
     }
-    CTuidMain.prototype.from = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var ret;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.entity.cFrom()];
-                    case 1:
-                        ret = _a.sent();
-                        if (ret === undefined)
-                            return [2 /*return*/, this];
-                        return [2 /*return*/, ret];
-                }
-            });
-        });
+    CTuidBase.prototype.from = function () {
+        var ret = this.entity.cFrom();
+        if (ret === undefined)
+            return this;
+        return ret;
     };
-    CTuidMain.prototype.cUqFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.entity.cUqFrom()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
+    CTuidBase.prototype.cUqFrom = function () {
+        return this.entity.cUqFrom();
     };
-    CTuidMain.prototype.cEditFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.entity.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [4 /*yield*/, cUq.cTuidEditFromName(this.entity.name)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
+    CTuidBase.prototype.cEditFrom = function () {
+        var cUq = this.entity.cUqFrom();
+        return cUq.cTuidEditFromName(this.entity.name);
     };
-    CTuidMain.prototype.cInfoFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.entity.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [4 /*yield*/, cUq.cTuidInfoFromName(this.entity.name)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
+    CTuidBase.prototype.cInfoFrom = function () {
+        var cUq = this.entity.cUqFrom();
+        return cUq.cTuidInfoFromName(this.entity.name);
     };
-    CTuidMain.prototype.cSelectFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.entity.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [4 /*yield*/, cUq.cTuidSelectFromName(this.entity.name)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
+    CTuidBase.prototype.cSelectFrom = function () {
+        var cUq = this.entity.cUqFrom();
+        return cUq.cTuidSelectFromName(this.entity.name);
     };
-    CTuidMain.prototype.getLable = function (tuid) {
+    CTuidBase.prototype.getLable = function (tuid) {
         if (tuid === this.entity)
             return this.label;
         var name = tuid.name;
@@ -193,21 +147,168 @@ var CTuidMain = /** @class */ (function (_super) {
         }
         return name;
     };
-    Object.defineProperty(CTuidMain.prototype, "VTuidMain", {
+    Object.defineProperty(CTuidBase.prototype, "VTuidMain", {
         get: function () { return VTuidMain; },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(CTuidMain.prototype, "VTuidEdit", {
+    Object.defineProperty(CTuidBase.prototype, "VTuidEdit", {
         get: function () { return VTuidEdit; },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(CTuidMain.prototype, "VTuidList", {
+    Object.defineProperty(CTuidBase.prototype, "VTuidList", {
         get: function () { return VTuidMainList; },
         enumerable: true,
         configurable: true
     });
+    CTuidBase.prototype.internalStart = function (param) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.isFrom = this.entity.schemaFrom !== undefined;
+                        return [4 /*yield*/, this.openVPage(this.VTuidMain)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.onEvent = function (type, value) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, cTuidInfo;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = type;
+                        switch (_a) {
+                            case 'new': return [3 /*break*/, 2];
+                            case 'list': return [3 /*break*/, 4];
+                            case 'edit': return [3 /*break*/, 6];
+                            case 'item-changed': return [3 /*break*/, 8];
+                            case 'info': return [3 /*break*/, 9];
+                        }
+                        return [3 /*break*/, 1];
+                    case 1: return [2 /*return*/];
+                    case 2: return [4 /*yield*/, this.onNew()];
+                    case 3:
+                        _b.sent();
+                        return [3 /*break*/, 11];
+                    case 4: return [4 /*yield*/, this.onList()];
+                    case 5:
+                        _b.sent();
+                        return [3 /*break*/, 11];
+                    case 6: return [4 /*yield*/, this.onEdit(value)];
+                    case 7:
+                        _b.sent();
+                        return [2 /*return*/];
+                    case 8:
+                        this.itemChanged(value);
+                        return [2 /*return*/];
+                    case 9:
+                        cTuidInfo = new CTuidInfo(this.cUq, this.entity, this.ui, this.res);
+                        return [4 /*yield*/, cTuidInfo.start(value)];
+                    case 10:
+                        _b.sent();
+                        return [2 /*return*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.edit = function (values) {
+        return __awaiter(this, void 0, void 0, function () {
+            var cTuidEdit;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        cTuidEdit = this.ui && this.ui.CTuidEdit;
+                        if (!(cTuidEdit === undefined)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.openVPage(this.VTuidEdit, values)];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, (new cTuidEdit(this.cUq, this.entity, this.ui, this.res)).start(values)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.onNew = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.edit(undefined)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.onList = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var cTuidList;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        cTuidList = this.ui && this.ui.CTuidList;
+                        if (!(cTuidList === undefined)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.openVPage(this.VTuidList, undefined)];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, (new cTuidList(this.cUq, this.entity, this.ui, this.res)).start(undefined)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.onEdit = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var values;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        values = undefined;
+                        if (!(id !== undefined)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.entity.load(id)];
+                    case 1:
+                        values = _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        this.edit(values);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CTuidBase.prototype.itemChanged = function (_a) {
+        var id = _a.id, values = _a.values;
+        if (this.PageItems === undefined)
+            return;
+        var items = this.PageItems.items;
+        var item = items.find(function (v) { return v.id === id; });
+        if (item !== undefined) {
+            _.merge(item, values);
+        }
+    };
+    return CTuidBase;
+}(CTuid));
+export { CTuidBase };
+var CTuidMain = /** @class */ (function (_super) {
+    __extends(CTuidMain, _super);
+    function CTuidMain() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
     CTuidMain.prototype.internalStart = function (param) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -222,83 +323,8 @@ var CTuidMain = /** @class */ (function (_super) {
             });
         });
     };
-    CTuidMain.prototype.onEvent = function (type, value) {
-        return __awaiter(this, void 0, void 0, function () {
-            var v, _a, cTuidInfo;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = type;
-                        switch (_a) {
-                            case 'new': return [3 /*break*/, 2];
-                            case 'list': return [3 /*break*/, 3];
-                            case 'edit': return [3 /*break*/, 4];
-                            case 'item-changed': return [3 /*break*/, 6];
-                            case 'info': return [3 /*break*/, 7];
-                        }
-                        return [3 /*break*/, 1];
-                    case 1: return [2 /*return*/];
-                    case 2:
-                        v = this.VTuidEdit;
-                        return [3 /*break*/, 9];
-                    case 3:
-                        v = this.VTuidList;
-                        return [3 /*break*/, 9];
-                    case 4: return [4 /*yield*/, this.edit(value)];
-                    case 5:
-                        _b.sent();
-                        return [2 /*return*/];
-                    case 6:
-                        this.itemChanged(value);
-                        return [2 /*return*/];
-                    case 7:
-                        cTuidInfo = new CTuidInfo(this.cUq, this.entity, this.ui, this.res);
-                        return [4 /*yield*/, cTuidInfo.start(value)];
-                    case 8:
-                        _b.sent();
-                        return [2 /*return*/];
-                    case 9: return [4 /*yield*/, this.openVPage(v, value)];
-                    case 10:
-                        _b.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    CTuidMain.prototype.edit = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var values, v;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        values = undefined;
-                        if (!(id !== undefined)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.entity.load(id)];
-                    case 1:
-                        values = _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        v = this.VTuidEdit;
-                        return [4 /*yield*/, this.openVPage(v, values)];
-                    case 3:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    CTuidMain.prototype.itemChanged = function (_a) {
-        var id = _a.id, values = _a.values;
-        if (this.PageItems === undefined)
-            return;
-        var items = this.PageItems.items;
-        var item = items.find(function (v) { return v.id === id; });
-        if (item !== undefined) {
-            _.merge(item, values);
-        }
-    };
     return CTuidMain;
-}(CTuid));
+}(CTuidBase));
 export { CTuidMain };
 var CTuidEdit = /** @class */ (function (_super) {
     __extends(CTuidEdit, _super);
@@ -309,7 +335,9 @@ var CTuidEdit = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.edit(id)];
+                    case 0:
+                        this.isFrom = this.entity.schemaFrom !== undefined;
+                        return [4 /*yield*/, this.onEdit(id)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -318,7 +346,7 @@ var CTuidEdit = /** @class */ (function (_super) {
         });
     };
     return CTuidEdit;
-}(CTuidMain));
+}(CTuidBase));
 export { CTuidEdit };
 var CTuidList = /** @class */ (function (_super) {
     __extends(CTuidList, _super);
@@ -329,7 +357,9 @@ var CTuidList = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.openVPage(this.VTuidList)];
+                    case 0:
+                        this.isFrom = this.entity.schemaFrom !== undefined;
+                        return [4 /*yield*/, this.openVPage(this.VTuidList)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -338,7 +368,7 @@ var CTuidList = /** @class */ (function (_super) {
         });
     };
     return CTuidList;
-}(CTuidMain));
+}(CTuidBase));
 export { CTuidList };
 var CTuidDiv = /** @class */ (function (_super) {
     __extends(CTuidDiv, _super);

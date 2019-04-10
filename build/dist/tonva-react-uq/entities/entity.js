@@ -53,11 +53,7 @@ var Entity = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    Entity.prototype.getApiFrom = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/, this.entities.uqApi];
-        }); });
-    };
+    Entity.prototype.getApiFrom = function () { return this.entities.uqApi; };
     Entity.prototype.fieldMap = function (arr) {
         if (arr === undefined)
             arr = '$';
@@ -99,6 +95,7 @@ var Entity = /** @class */ (function () {
                     case 1:
                         schema = _a.sent();
                         this.setSchema(schema);
+                        this.buildFieldsTuid();
                         return [2 /*return*/];
                 }
             });
@@ -110,9 +107,13 @@ var Entity = /** @class */ (function () {
         if (this.schema !== undefined)
             return;
         this.schema = schema;
-        var name = schema.name, fields = schema.fields, arrs = schema.arrs, returns = schema.returns;
+        var name = schema.name;
         if (name !== this.name)
             this.jName = name;
+        this.buildFieldsTuid();
+    };
+    Entity.prototype.buildFieldsTuid = function () {
+        var _a = this.schema, fields = _a.fields, arrs = _a.arrs, returns = _a.returns;
         this.entities.buildFieldTuid(this.fields = fields);
         this.entities.buildArrFieldsTuid(this.arrFields = arrs, fields);
         this.entities.buildArrFieldsTuid(this.returns = returns, fields);

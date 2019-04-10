@@ -54,7 +54,7 @@ var Tv = observer(function (_a) {
                 tuidValue);
     }
     if (nullUI === undefined)
-        return React.createElement(React.Fragment, null, "null");
+        return React.createElement(React.Fragment, null, ".");
     return nullUI();
 });
 export var tv = function (tuidValue, ui, x, nullUI) {

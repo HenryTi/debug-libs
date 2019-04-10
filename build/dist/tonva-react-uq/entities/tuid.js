@@ -76,7 +76,7 @@ var Tuid = /** @class */ (function (_super) {
         this.BoxId = function () { };
         var prototype = this.BoxId.prototype;
         Object.defineProperty(prototype, '_$tuid', {
-            value: this,
+            value: this.from(),
             writable: false,
             enumerable: false,
         });
@@ -100,6 +100,8 @@ var Tuid = /** @class */ (function (_super) {
         prototype.toJSON = function () { return this.id; };
     };
     Tuid.prototype.boxId = function (id) {
+        if (typeof id === 'object')
+            return id;
         this.useId(id);
         var ret = new this.BoxId();
         ret.id = id;
@@ -117,6 +119,23 @@ var Tuid = /** @class */ (function (_super) {
         this.idName = id;
         this.unique = unique;
         this.schemaFrom = this.schema.from;
+    };
+    Tuid.prototype.buildFieldsTuid = function () {
+        _super.prototype.buildFieldsTuid.call(this);
+        var mainFields = this.schema.mainFields;
+        if (mainFields !== undefined) {
+            var _loop_1 = function (mf) {
+                var f = this_1.fields.find(function (v) { return v.name === mf.name; });
+                if (f === undefined)
+                    return "continue";
+                mf._tuid = f._tuid;
+            };
+            var this_1 = this;
+            for (var _i = 0, mainFields_1 = mainFields; _i < mainFields_1.length; _i++) {
+                var mf = mainFields_1[_i];
+                _loop_1(mf);
+            }
+        }
     };
     Tuid.prototype.moveToHead = function (id) {
         var index = this.queue.findIndex(function (v) { return v === id; });
@@ -146,6 +165,8 @@ var Tuid = /** @class */ (function (_super) {
     };
     Tuid.prototype.valueFromFieldName = function (fieldName, obj) {
         if (obj === undefined)
+            return;
+        if (this.fields === undefined)
             return;
         var f = this.fields.find(function (v) { return v.name === fieldName; });
         if (f === undefined)
@@ -244,6 +265,8 @@ var Tuid = /** @class */ (function (_super) {
         return true;
     };
     Tuid.prototype.afterCacheId = function (tuidValue) {
+        if (this.fields === undefined)
+            return;
         for (var _i = 0, _a = this.fields; _i < _a.length; _i++) {
             var f = _a[_i];
             var _tuid = f._tuid;
@@ -252,50 +275,32 @@ var Tuid = /** @class */ (function (_super) {
             _tuid.useId(tuidValue[f.name]);
         }
     };
-    Tuid.prototype.from = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
-    };
+    Tuid.prototype.from = function () { return; };
     Tuid.prototype.unpackTuidIds = function (values) {
-        return __awaiter(this, void 0, void 0, function () {
-            var mainFields, ret, len, p, ch, row, tuidMain, ret;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!(this.schemaFrom === undefined)) return [3 /*break*/, 1];
-                        if (this.name === 'contact')
-                            debugger;
-                        mainFields = this.schema.mainFields;
-                        if (mainFields === undefined)
-                            return [2 /*return*/, values];
-                        ret = [];
-                        len = values.length;
-                        p = 0;
-                        while (p < len) {
-                            ch = values.charCodeAt(p);
-                            if (ch === 10) {
-                                ++p;
-                                break;
-                            }
-                            row = {};
-                            p = this.unpackRow(row, mainFields, values, p);
-                            ret.push(row);
-                        }
-                        return [2 /*return*/, ret];
-                    case 1:
-                        if (this.name === 'contact')
-                            debugger;
-                        return [4 /*yield*/, this.from()];
-                    case 2:
-                        tuidMain = _a.sent();
-                        return [4 /*yield*/, tuidMain.unpackTuidIds(values)];
-                    case 3:
-                        ret = _a.sent();
-                        return [2 /*return*/, ret];
+        if (this.schemaFrom === undefined) {
+            var mainFields = this.schema.mainFields;
+            if (mainFields === undefined)
+                return values;
+            var ret = [];
+            var len = values.length;
+            var p = 0;
+            while (p < len) {
+                var ch = values.charCodeAt(p);
+                if (ch === 10) {
+                    ++p;
+                    break;
                 }
-            });
-        });
+                var row = {};
+                p = this.unpackRow(row, mainFields, values, p);
+                ret.push(row);
+            }
+            return ret;
+        }
+        else {
+            var tuidMain = this.from();
+            var ret = tuidMain.unpackTuidIds(values);
+            return ret;
+        }
     };
     Tuid.prototype.cacheIds = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -312,17 +317,11 @@ var Tuid = /** @class */ (function (_super) {
                             name = this.owner.name;
                             arr = this.name;
                         }
-                        return [4 /*yield*/, this.getApiFrom()];
-                    case 1:
-                        api = _a.sent();
+                        api = this.getApiFrom();
                         return [4 /*yield*/, api.tuidIds(name, arr, this.waitingIds)];
-                    case 2:
+                    case 1:
                         tuids = _a.sent();
-                        return [4 /*yield*/, this.unpackTuidIds(tuids)];
-                    case 3:
-                        tuids = _a.sent();
-                        if (this.name === 'contact')
-                            debugger;
+                        tuids = this.unpackTuidIds(tuids);
                         for (_i = 0, tuids_1 = tuids; _i < tuids_1.length; _i++) {
                             tuidValue = tuids_1[_i];
                             if (this.cacheValue(tuidValue) === false)
@@ -331,7 +330,7 @@ var Tuid = /** @class */ (function (_super) {
                             this.afterCacheId(tuidValue);
                         }
                         return [4 /*yield*/, this.cacheDivIds()];
-                    case 4:
+                    case 2:
                         _a.sent();
                         return [2 /*return*/];
                 }
@@ -353,11 +352,9 @@ var Tuid = /** @class */ (function (_super) {
                     case 0:
                         if (id === undefined || id === 0)
                             return [2 /*return*/];
-                        return [4 /*yield*/, this.getApiFrom()];
-                    case 1:
-                        api = _a.sent();
+                        api = this.getApiFrom();
                         return [4 /*yield*/, api.tuidGet(this.name, id)];
-                    case 2:
+                    case 1:
                         values = _a.sent();
                         if (values === undefined)
                             return [2 /*return*/];
@@ -404,7 +401,7 @@ var Tuid = /** @class */ (function (_super) {
     };
     Tuid.prototype.save = function (id, props) {
         return __awaiter(this, void 0, void 0, function () {
-            var params, ret, retId, inId;
+            var params, ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -413,7 +410,8 @@ var Tuid = /** @class */ (function (_super) {
                         return [4 /*yield*/, this.tvApi.tuidSave(this.name, params)];
                     case 1:
                         ret = _a.sent();
-                        retId = ret.id, inId = ret.inId;
+                        /*
+                        let {id:retId, inId} = ret;
                         if (retId === undefined) {
                             params.id = id;
                             this.cacheValue(params);
@@ -422,6 +420,7 @@ var Tuid = /** @class */ (function (_super) {
                             params.id = retId;
                             this.cacheValue(params);
                         }
+                        */
                         return [2 /*return*/, ret];
                 }
             });
@@ -455,11 +454,9 @@ var Tuid = /** @class */ (function (_super) {
                             name = this.name;
                             arr = undefined;
                         }
-                        return [4 /*yield*/, this.getApiFrom()];
-                    case 1:
-                        api = _a.sent();
+                        api = this.getApiFrom();
                         return [4 /*yield*/, api.tuidSearch(name, arr, owner, key, pageStart, pageSize)];
-                    case 2:
+                    case 1:
                         ret = _a.sent();
                         for (_i = 0, ret_1 = ret; _i < ret_1.length; _i++) {
                             row = ret_1[_i];
@@ -480,11 +477,9 @@ var Tuid = /** @class */ (function (_super) {
                     case 0:
                         if (id === undefined || id === 0)
                             return [2 /*return*/];
-                        return [4 /*yield*/, this.getApiFrom()];
-                    case 1:
-                        api = _a.sent();
+                        api = this.getApiFrom();
                         return [4 /*yield*/, api.tuidArrGet(this.name, arr, owner, id)];
-                    case 2: return [2 /*return*/, _a.sent()];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -552,6 +547,7 @@ var TuidMain = /** @class */ (function (_super) {
         configurable: true
     });
     ;
+    //proxies: {[name:string]: TuidMain};
     TuidMain.prototype.setSchema = function (schema) {
         _super.prototype.setSchema.call(this, schema);
         var arrs = schema.arrs;
@@ -606,129 +602,58 @@ var TuidMain = /** @class */ (function (_super) {
         });
     };
     TuidMain.prototype.cUqFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, owner, uq, cUq, cApp, cUqFrm, retErrors;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (this.schemaFrom === undefined)
-                            return [2 /*return*/, this.entities.cUq];
-                        _a = this.schemaFrom, owner = _a.owner, uq = _a.uq;
-                        cUq = this.entities.cUq;
-                        cApp = cUq.cApp;
-                        if (cApp === undefined)
-                            return [2 /*return*/, cUq];
-                        return [4 /*yield*/, cApp.getImportUq(owner, uq)];
-                    case 1:
-                        cUqFrm = _b.sent();
-                        if (cUqFrm === undefined) {
-                            console.error(owner + "/" + uq + " \u4E0D\u5B58\u5728");
-                            debugger;
-                            return [2 /*return*/, cUq];
-                        }
-                        return [4 /*yield*/, cUqFrm.loadSchema()];
-                    case 2:
-                        retErrors = _b.sent();
-                        if (retErrors !== undefined) {
-                            console.error('cUq.loadSchema: ' + retErrors);
-                            debugger;
-                            return [2 /*return*/, cUq];
-                        }
-                        return [2 /*return*/, cUqFrm];
-                }
-            });
-        });
+        if (this.schemaFrom === undefined)
+            return this.entities.cUq;
+        var _a = this.schemaFrom, owner = _a.owner, uq = _a.uq;
+        var cUq = this.entities.cUq;
+        var cApp = cUq.cApp;
+        if (cApp === undefined)
+            return cUq;
+        var cUqFrm = cApp.getImportUq(owner, uq);
+        if (cUqFrm === undefined) {
+            console.error(owner + "/" + uq + " \u4E0D\u5B58\u5728");
+            debugger;
+            return cUq;
+        }
+        /*
+        let retErrors = await cUqFrm.loadSchema();
+        if (retErrors !== undefined) {
+            console.error('cUq.loadSchema: ' + retErrors);
+            debugger;
+            return cUq;
+        }*/
+        return cUqFrm;
     };
     TuidMain.prototype.getApiFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var from;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.from()];
-                    case 1:
-                        from = _a.sent();
-                        if (from !== undefined) {
-                            return [2 /*return*/, from.entities.uqApi];
-                        }
-                        return [2 /*return*/, this.entities.uqApi];
-                }
-            });
-        });
+        var from = this.from();
+        if (from !== undefined) {
+            return from.entities.uqApi;
+        }
+        return this.entities.uqApi;
     };
     TuidMain.prototype.from = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [2 /*return*/, cUq.tuid(this.name)];
-                }
-            });
-        });
+        if (this.schemaFrom === undefined)
+            return this;
+        var cUq = this.cUqFrom();
+        return cUq.tuid(this.name);
     };
     TuidMain.prototype.cFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [2 /*return*/, cUq.cTuidMainFromName(this.name)];
-                }
-            });
-        });
+        var cUq = this.cUqFrom();
+        return cUq.cTuidMainFromName(this.name);
     };
     TuidMain.prototype.cEditFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [2 /*return*/, cUq.cTuidEditFromName(this.name)];
-                }
-            });
-        });
+        var cUq = this.cUqFrom();
+        return cUq.cTuidEditFromName(this.name);
     };
     TuidMain.prototype.cInfoFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        return [2 /*return*/, cUq.cTuidInfoFromName(this.name)];
-                }
-            });
-        });
+        var cUq = this.cUqFrom();
+        return cUq.cTuidInfoFromName(this.name);
     };
     TuidMain.prototype.cSelectFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var cUq;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.cUqFrom()];
-                    case 1:
-                        cUq = _a.sent();
-                        if (cUq === undefined)
-                            return [2 /*return*/];
-                        return [2 /*return*/, cUq.cTuidSelectFromName(this.name)];
-                }
-            });
-        });
-    };
-    TuidMain.prototype.afterCacheId = function (tuidValue) {
-        _super.prototype.afterCacheId.call(this, tuidValue);
-        if (this.proxies === undefined)
+        var cUq = this.cUqFrom();
+        if (cUq === undefined)
             return;
-        var type = tuidValue.type, $proxy = tuidValue.$proxy;
-        var pTuid = this.proxies[type];
-        pTuid.useId($proxy);
+        return cUq.cTuidSelectFromName(this.name);
     };
     return TuidMain;
 }(Tuid));
@@ -744,14 +669,7 @@ var TuidDiv = /** @class */ (function (_super) {
         configurable: true
     });
     TuidDiv.prototype.getApiFrom = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.owner.getApiFrom()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
+        return this.owner.getApiFrom();
     };
     return TuidDiv;
 }(Tuid));

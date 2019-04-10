@@ -56,7 +56,8 @@ import * as React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import './App.css';
-import { Page, NavView, nav, Image, ResUploader } from 'tonva-tools';
+import { Page, Tabs, NavView, nav, Image, ResUploader } from 'tonva-tools';
+import { faceTabs } from 'face';
 import { ViewMainSubs, ViewListMainSubs, renderMainProduct, renderSubPack } from 'mainSubs';
 /*
 @observer
@@ -230,13 +231,15 @@ var App = /** @class */ (function (_super) {
             mainSubs,
             mainSubs,
         ];
+        /*
+        <Uploader />
+        {one.render()}
+        <br/>
+        <br/>
+        {list.render()}
+        */
         var page = React.createElement(Page, { header: false },
-            React.createElement(Uploader, null),
-            one.render(),
-            React.createElement("br", null),
-            React.createElement("br", null),
-            list.render());
-        //<Tabs tabs={faceTabs} />
+            React.createElement(Tabs, { tabs: faceTabs }));
         return React.createElement(NavView, { onLogined: function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                 return [2 /*return*/, nav.push(page)];
             }); }); }, notLogined: function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {

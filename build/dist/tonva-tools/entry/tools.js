@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { nav } from 'tonva-tools';
+import { nav } from '../ui';
 var logo = require('../img/logo.svg');
 export function tonvaTop() {
     return nav.loginTop(React.createElement("div", { className: "d-flex align-items-center" },
