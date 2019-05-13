@@ -337,10 +337,16 @@ var CTuidEdit = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         this.isFrom = this.entity.schemaFrom !== undefined;
+                        if (!(typeof (id) === 'number')) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.onEdit(id)];
                     case 1:
                         _a.sent();
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.edit(id)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         });

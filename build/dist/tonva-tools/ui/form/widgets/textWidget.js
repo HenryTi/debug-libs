@@ -100,7 +100,7 @@ var TextWidget = /** @class */ (function (_super) {
     TextWidget.prototype.onFocus = function (evt) {
         this.clearError();
         this.context.removeErrorWidget(this);
-        this.context.removeErrors();
+        this.context.clearErrors();
     };
     TextWidget.prototype.onChange = function (evt) {
     };

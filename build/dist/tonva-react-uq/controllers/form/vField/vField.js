@@ -361,4 +361,12 @@ var VDateTimeField = /** @class */ (function (_super) {
     return VDateTimeField;
 }(VStringField));
 export { VDateTimeField };
+var VDateField = /** @class */ (function (_super) {
+    __extends(VDateField, _super);
+    function VDateField() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return VDateField;
+}(VStringField));
+export { VDateField };
 //# sourceMappingURL=vField.js.map

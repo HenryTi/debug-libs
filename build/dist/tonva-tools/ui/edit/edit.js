@@ -62,13 +62,15 @@ var Edit = /** @class */ (function (_super) {
     function Edit(props) {
         var _this = _super.call(this, props) || this;
         _this.defaultSepClassName = "border-top edit-sep-light-gray";
-        _this.defaultRowContainerClassName = "d-flex px-3 py-2 cursor-pointer bg-white align-items-center";
+        _this.defaultRowContainerClassName = "d-flex px-3 py-2 bg-white align-items-center";
         _this.rowClick = function (itemSchema, uiItem, label, value) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, onItemChanged, onItemClick, changeValue, itemEdit, err_1;
+            var _a, onItemChanged, onItemClick, stopEdit, changeValue, itemEdit, err_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = this.props, onItemChanged = _a.onItemChanged, onItemClick = _a.onItemClick;
+                        _a = this.props, onItemChanged = _a.onItemChanged, onItemClick = _a.onItemClick, stopEdit = _a.stopEdit;
+                        if (stopEdit === true)
+                            return [2 /*return*/];
                         if (!(onItemClick !== undefined)) return [3 /*break*/, 2];
                         return [4 /*yield*/, onItemClick(itemSchema, uiItem, value)];
                     case 1:
@@ -102,10 +104,12 @@ var Edit = /** @class */ (function (_super) {
                 }
             });
         }); };
-        var topBorderClassName = props.topBorderClassName, bottomBorderClassName = props.bottomBorderClassName, sepClassName = props.sepClassName, rowContainerClassName = props.rowContainerClassName, uiSchema = props.uiSchema;
+        var topBorderClassName = props.topBorderClassName, bottomBorderClassName = props.bottomBorderClassName, sepClassName = props.sepClassName, rowContainerClassName = props.rowContainerClassName, uiSchema = props.uiSchema, stopEdit = props.stopEdit;
         _this.topBorder = React.createElement("div", { className: topBorderClassName || _this.defaultSepClassName });
         _this.bottomBorder = React.createElement("div", { className: bottomBorderClassName || _this.defaultSepClassName });
         _this.rowContainerClassName = rowContainerClassName || _this.defaultRowContainerClassName;
+        if (stopEdit !== true)
+            _this.rowContainerClassName += ' cursor-pointer';
         _this.sep = React.createElement("div", { className: sepClassName || _this.defaultSepClassName });
         _this.uiSchema = (uiSchema && uiSchema.items) || {};
         return _this;
@@ -146,7 +150,7 @@ var Edit = /** @class */ (function (_super) {
             }); }); } },
             React.createElement("div", { className: "w-6c" }, label),
             React.createElement("div", { className: "flex-fill d-flex justify-content-end" }, divValue),
-            React.createElement("div", { className: "w-2c text-right" },
+            this.props.stopEdit !== true && React.createElement("div", { className: "w-2c text-right" },
                 React.createElement("i", { className: "fa fa-chevron-right" })));
     };
     Edit = __decorate([

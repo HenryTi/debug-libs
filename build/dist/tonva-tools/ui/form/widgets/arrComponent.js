@@ -84,7 +84,7 @@ export var ArrComponent = observer(function (_a) {
                 var $source = row.$source;
                 if ($source !== undefined)
                     $source.$isSelected = checked;
-                rowContext.removeErrors();
+                rowContext.clearErrors();
             };
             selectCheck = React.createElement("div", { className: "form-row-checkbox" },
                 React.createElement("input", { type: "checkbox", onClick: onClick, defaultChecked: row.$isSelected }));
@@ -104,7 +104,7 @@ export var ArrComponent = observer(function (_a) {
                     if (p >= 0)
                         data.splice(p, 1);
                 }
-                rowContext.removeErrors();
+                rowContext.clearErrors();
             };
             deleteIcon = React.createElement("div", { className: "form-row-edit text-info", onClick: onDelClick },
                 React.createElement("i", { className: classNames('fa', icon, 'fa-fw') }));
@@ -113,7 +113,7 @@ export var ArrComponent = observer(function (_a) {
             function (content) { return React.createElement("fieldset", { disabled: isDeleted },
                 React.createElement("div", { className: classNames('d-flex', { 'deleted': isDeleted, 'row-selected': row.$isSelected }) },
                     selectCheck,
-                    React.createElement("div", { className: "flex-grow-1" }, content),
+                    React.createElement("div", { className: selectable === true && deletable === true ? "form-row-content" : "form-row-content-1" }, content),
                     deleteIcon)); }
             :
                 function (content) { return content; };

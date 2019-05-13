@@ -22,7 +22,7 @@ var CheckBoxWidget = /** @class */ (function (_super) {
             _this.setDataValue(evt.target.checked === true ? _this.trueValue : _this.falseValue);
         };
         _this.onClick = function () {
-            _this.context.removeErrors();
+            _this.context.clearErrors();
         };
         return _this;
     }

@@ -69,7 +69,7 @@ var Form = /** @class */ (function (_super) {
             _this.calcSelectOrDelete();
         };
         _this.DefaultContainer = function (content) {
-            return React.createElement("form", { className: classNames(_this.props.className) }, content);
+            return React.createElement("form", { className: classNames(_this.props.className), onSubmit: function (e) { return e.preventDefault(); } }, content);
         };
         _this.DefaultFieldContainer = function (label, content) {
             var fieldLabelSize = _this.props.fieldLabelSize;
@@ -99,7 +99,6 @@ var Form = /** @class */ (function (_super) {
                 content);
         };
         _this.RowContainer = function (content) {
-            //return <div className="row">{content}</div>;
             var cn = classNames({
                 'py-3': true
             });

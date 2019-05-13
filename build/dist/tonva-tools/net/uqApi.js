@@ -455,6 +455,16 @@ var UqApi = /** @class */ (function (_super) {
             });
         });
     };
+    UqApi.prototype.mySheets = function (name, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.post('sheet/' + name + '/my-sheets', data)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     UqApi.prototype.getSheet = function (name, id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -664,7 +674,7 @@ var UqTokenApi = /** @class */ (function (_super) {
     }
     UqTokenApi.prototype.uq = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var unitParam, uqOwner, uqName, ls, _a, unit, user, un, nowTick, uq, tick, value, ret, err_2;
+            var unitParam, uqOwner, uqName, ls, _a, unit, user, un, nowTick, uq, tick, value, ret, unit, uqOwner_1, uqName_1, err, err_2;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -693,13 +703,18 @@ var UqTokenApi = /** @class */ (function (_super) {
                         uq = this.local.uqs[un];
                         if (uq !== undefined) {
                             tick = uq.tick, value = uq.value;
-                            if ((nowTick - tick) < 24 * 3600 * 1000) {
+                            if (value !== undefined && (nowTick - tick) < 24 * 3600 * 1000) {
                                 return [2 /*return*/, _.clone(value)];
                             }
                         }
                         return [4 /*yield*/, this.get('app-uq', params)];
                     case 1:
                         ret = _b.sent();
+                        if (ret === undefined) {
+                            unit = params.unit, uqOwner_1 = params.uqOwner, uqName_1 = params.uqName;
+                            err = "center get app-uq(unit=" + unit + ", '" + uqOwner_1 + "/" + uqName_1 + "') - not exists or no unit-service";
+                            throw err;
+                        }
                         this.local.uqs[un] = {
                             tick: nowTick,
                             value: ret,

@@ -23,8 +23,8 @@ import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
 var Context = /** @class */ (function () {
     function Context(form, uiSchema, data, inNode, isRow) {
-        var _a;
         var _this = this;
+        var _a;
         this.widgets = {};
         this.errors = [];
         this.errorWidgets = [];
@@ -146,7 +146,7 @@ var Context = /** @class */ (function () {
             var arrRowContexts = this.subContexts[i];
             for (var j in arrRowContexts) {
                 var rowContext = arrRowContexts[j];
-                rowContext.removeErrors();
+                rowContext.clearErrors();
                 rowContext.checkContextRules();
             }
         }
@@ -159,10 +159,15 @@ var Context = /** @class */ (function () {
         this.addErrorWidget(widget);
     };
     Context.prototype.clearContextErrors = function () {
-        for (var i in this.widgets)
-            this.widgets[i].clearContextError();
+        for (var i in this.widgets) {
+            var widget = this.widgets[i];
+            if (widget === undefined)
+                continue;
+            widget.clearContextError();
+        }
     };
     Context.prototype.checkRules = function () {
+        this.clearErrors();
         this.checkFieldRules();
         this.checkContextRules();
     };
@@ -199,15 +204,10 @@ var Context = /** @class */ (function () {
         configurable: true
     });
     ;
-    Context.prototype.removeErrors = function () {
+    Context.prototype.clearErrors = function () {
         this.errors.splice(0);
         this.errorWidgets.splice(0);
-        for (var i in this.widgets) {
-            var widget = this.widgets[i];
-            if (widget === undefined)
-                continue;
-            widget.clearContextError();
-        }
+        this.clearContextErrors();
     };
     __decorate([
         observable
@@ -255,9 +255,9 @@ var RowContext = /** @class */ (function (_super) {
         configurable: true
     });
     //get data() {return this.row.data;}
-    RowContext.prototype.removeErrors = function () {
-        _super.prototype.removeErrors.call(this);
-        this.parentContext.removeErrors();
+    RowContext.prototype.clearErrors = function () {
+        _super.prototype.clearErrors.call(this);
+        this.parentContext.clearErrors();
     };
     Object.defineProperty(RowContext.prototype, "parentData", {
         get: function () { return this.parentContext.data; },

@@ -172,22 +172,18 @@ function initSubWin(message) {
 }
 function onReceiveAppApiMessage(hash, apiName) {
     return __awaiter(this, void 0, void 0, function () {
-        var appInFrame, unit, predefinedUnit, parts, ret;
+        var appInFrame, unit, parts, ret;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     appInFrame = appsInFrame[hash];
                     if (appInFrame === undefined)
                         return [2 /*return*/, { name: apiName, url: undefined, urlDebug: undefined, token: undefined }];
-                    unit = appInFrame.unit, predefinedUnit = appInFrame.predefinedUnit;
+                    unit = getUnit();
                     parts = apiName.split('/');
-                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit || predefinedUnit, uqOwner: parts[0], uqName: parts[1] })];
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit, uqOwner: parts[0], uqName: parts[1] })];
                 case 1:
                     ret = _a.sent();
-                    if (ret === undefined) {
-                        console.log('apiTokenApi.api return undefined. api=%s, unit=%s', apiName, unit);
-                        throw 'api not found';
-                    }
                     return [2 /*return*/, { name: apiName, url: ret.url, urlDebug: ret.urlDebug, token: ret.token }];
             }
         });
@@ -266,9 +262,17 @@ export function appUrl(url, unitId, page, param) {
     }
     return { url: url, hash: u };
 }
+function getUnit() {
+    var unit = appInFrame.unit, predefinedUnit = appInFrame.predefinedUnit;
+    var realUnit = unit || predefinedUnit;
+    if (realUnit === undefined) {
+        throw 'no unit defined in unit.json or not logined in';
+    }
+    return realUnit;
+}
 export function appUq(uq, uqOwner, uqName) {
     return __awaiter(this, void 0, void 0, function () {
-        var uqToken, unit, predefinedUnit, err, url, urlDebug, realUrl;
+        var uqToken, unit, url, urlDebug, realUrl;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -277,14 +281,10 @@ export function appUq(uq, uqOwner, uqName) {
                     if (uqToken !== undefined)
                         return [2 /*return*/, uqToken];
                     if (!!isBridged()) return [3 /*break*/, 2];
-                    unit = appInFrame.unit, predefinedUnit = appInFrame.predefinedUnit;
-                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit || predefinedUnit, uqOwner: uqOwner, uqName: uqName })];
+                    unit = getUnit();
+                    return [4 /*yield*/, uqTokenApi.uq({ unit: unit, uqOwner: uqOwner, uqName: uqName })];
                 case 1:
                     uqToken = _a.sent();
-                    if (uqToken === undefined) {
-                        err = 'unauthorized call: uqTokenApi center return undefined!';
-                        throw err;
-                    }
                     if (uqToken.token === undefined)
                         uqToken.token = centerToken;
                     url = uqToken.url, urlDebug = uqToken.urlDebug;

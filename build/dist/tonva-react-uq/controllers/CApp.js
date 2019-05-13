@@ -420,6 +420,13 @@ var VAppMain = /** @class */ (function (_super) {
     __extends(VAppMain, _super);
     function VAppMain() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.appPage = function () {
+            var caption = _this.controller.caption;
+            return React.createElement(Page, { header: caption, logout: function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                    appInFrame.unit = undefined;
+                    return [2 /*return*/];
+                }); }); } }, _this.appContent());
+        };
         _this.appContent = function () {
             var cUqArr = _this.controller.cUqArr;
             var content;
@@ -445,14 +452,6 @@ var VAppMain = /** @class */ (function (_super) {
     };
     VAppMain.prototype.render = function (param) {
         return this.appContent();
-    };
-    VAppMain.prototype.appPage = function () {
-        var _this = this;
-        var caption = this.controller.caption;
-        return React.createElement(Page, { header: caption, logout: function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                appInFrame.unit = undefined;
-                return [2 /*return*/];
-            }); }); } }, this.appContent());
     };
     return VAppMain;
 }(VPage));

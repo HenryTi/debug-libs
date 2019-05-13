@@ -241,6 +241,22 @@ var Sheet = /** @class */ (function (_super) {
             });
         });
     };
+    Sheet.prototype.mySheets = function (state, pageStart, pageSize) {
+        return __awaiter(this, void 0, void 0, function () {
+            var ret;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.loadSchema()];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.tvApi.mySheets(this.name, { state: state, pageStart: pageStart, pageSize: pageSize })];
+                    case 2:
+                        ret = _a.sent();
+                        return [2 /*return*/, ret];
+                }
+            });
+        });
+    };
     return Sheet;
 }(Entity));
 export { Sheet };
