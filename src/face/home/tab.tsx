@@ -9,8 +9,17 @@ let LoadableComponent = Loadable({
     loading: Loading
 });
 
+let LoadableEditComponent = Loadable({
+    loader: ()=>import('./editTest'),
+    loading: Loading
+});
+
 const showFormClick = () => {
     nav.push(<Page header="Form Test"><LoadableComponent /></Page>);
+}
+
+const showEditClick = () => {
+    nav.push(<Page header="Edit Test"><LoadableEditComponent /></Page>);
 }
 
 const aContent = () => {
@@ -54,6 +63,7 @@ const aContent = () => {
         </div>
         <List items={products} item={{render:renderRow, onClick:onClick}} />
         <button onClick={showFormClick}>show form</button>
+        <button onClick={showEditClick}>show edit</button>
         afa af asfd <br/>
         afa af asfd <br/>
         afa af asfd <br/>
